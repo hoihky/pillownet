@@ -1,0 +1,9 @@
+bin/
+obj/
+.venv/
+*.user
+*.suo
+test_*.png
+test_*.jpg
+test_*.gif
+test_frames/

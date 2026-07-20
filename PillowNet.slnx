@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PillowNet.Cli/PillowNet.Cli.csproj" />
+  <Project Path="PillowNet.Core/PillowNet.Core.csproj" />
+</Solution>
