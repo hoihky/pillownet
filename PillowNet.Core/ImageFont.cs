@@ -17,11 +17,36 @@ public static class ImageFont
         return ((int)box.Item1, (int)box.Item2, (int)box.Item3, (int)box.Item4);
     }
 
+    public static (int Left, int Top, int Right, int Bottom) GetTextBBox(
+        string text,
+        string? fontPath,
+        int fontSize)
+    {
+        using var font = fontPath is not null
+            ? Truetype(fontPath, fontSize)
+            : LoadDefault(fontSize);
+
+        return GetBBox(font, text);
+    }
+
     public static double GetLength(IImageFont font, string text) =>
         PillowEnvironment.Bridge.FontGetlength(font.Handle, text);
 
     private sealed class ImageFontHandle(PyObject handle) : IImageFont
     {
+        private bool _disposed;
+
         public PyObject Handle { get; } = handle;
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            Handle.Dispose();
+            _disposed = true;
+        }
     }
 }

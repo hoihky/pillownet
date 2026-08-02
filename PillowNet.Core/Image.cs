@@ -17,6 +17,8 @@ public sealed class Image : IDisposable
 
     internal PyObject Handle { get; }
 
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(_disposed, this);
+
     /// <summary>Opens an image file. Mirrors <c>PIL.Image.open</c>.</summary>
     public static Image Open(string path) =>
         new(PillowEnvironment.Bridge.ImageOpen(path));
@@ -29,26 +31,49 @@ public sealed class Image : IDisposable
     public static Image FromBytes(string mode, (int Width, int Height) size, byte[] data) =>
         new(PillowEnvironment.Bridge.ImageFrombytes(mode, (size.Width, size.Height), data));
 
-    public int Width => (int)Handle.GetAttr("width").As<long>();
+    public int Width
+    {
+        get
+        {
+            ThrowIfDisposed();
+            return (int)Handle.GetAttr("width").As<long>();
+        }
+    }
 
-    public int Height => (int)Handle.GetAttr("height").As<long>();
+    public int Height
+    {
+        get
+        {
+            ThrowIfDisposed();
+            return (int)Handle.GetAttr("height").As<long>();
+        }
+    }
 
     public (int Width, int Height) Size
     {
         get
         {
+            ThrowIfDisposed();
             var size = Handle.GetAttr("size").As<(long, long)>();
             return ((int)size.Item1, (int)size.Item2);
         }
     }
 
-    public string Mode => Handle.GetAttr("mode").As<string>();
+    public string Mode
+    {
+        get
+        {
+            ThrowIfDisposed();
+            return Handle.GetAttr("mode").As<string>();
+        }
+    }
 
     public string? Format
     {
         get
         {
-            var format = Handle.GetAttr("format");
+            ThrowIfDisposed();
+            using var format = Handle.GetAttr("format");
             return format.IsNone() ? null : format.As<string>();
         }
     }
@@ -198,7 +223,7 @@ public sealed class Image : IDisposable
     public IReadOnlyList<Image> Split()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        var bands = Handle.GetAttr("split").Call();
+        using var bands = Handle.GetAttr("split").Call();
         return bands.AsEnumerable<PyObject>().Select(b => new Image(b)).ToArray();
     }
 
@@ -210,16 +235,32 @@ public sealed class Image : IDisposable
     }
 
     /// <summary>Gets EXIF metadata. Mirrors <c>Image.getexif</c>.</summary>
-    public Exif GetExif() => new(PillowEnvironment.Bridge.ExifFromImage(Handle));
+    public Exif GetExif()
+    {
+        ThrowIfDisposed();
+        return new(PillowEnvironment.Bridge.ExifFromImage(Handle));
+    }
 
     /// <summary>Ensures image data is loaded. Mirrors <c>Image.load</c>.</summary>
-    public void Load() => PillowEnvironment.Bridge.PixelLoad(Handle);
+    public void Load()
+    {
+        ThrowIfDisposed();
+        PillowEnvironment.Bridge.PixelLoad(Handle);
+    }
 
     /// <summary>Gets a pixel value. Mirrors <c>Image.getpixel</c>.</summary>
-    public PyObject GetPixel(int x, int y) => PixelAccess.GetPixel(this, x, y);
+    public PyObject GetPixel(int x, int y)
+    {
+        ThrowIfDisposed();
+        return PixelAccess.GetPixel(this, x, y);
+    }
 
     /// <summary>Sets a pixel value. Mirrors <c>Image.putpixel</c>.</summary>
-    public void PutPixel(int x, int y, long value) => PixelAccess.PutPixel(this, x, y, value);
+    public void PutPixel(int x, int y, long value)
+    {
+        ThrowIfDisposed();
+        PixelAccess.PutPixel(this, x, y, value);
+    }
 
     public void Dispose()
     {
@@ -228,8 +269,14 @@ public sealed class Image : IDisposable
             return;
         }
 
-        PillowEnvironment.Bridge.ImageClose(Handle);
-        Handle.Dispose();
-        _disposed = true;
+        try
+        {
+            PillowEnvironment.Bridge.ImageClose(Handle);
+        }
+        finally
+        {
+            Handle.Dispose();
+            _disposed = true;
+        }
     }
 }

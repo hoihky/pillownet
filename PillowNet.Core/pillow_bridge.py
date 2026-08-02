@@ -388,6 +388,15 @@ def font_getlength(font: Any, text: str) -> float:
     return font.getlength(text)
 
 
+def font_text_bbox(text: str, font_path: str | None, font_size: int) -> tuple[int, int, int, int]:
+    font = (
+        ImageFont.truetype(font_path, font_size)
+        if font_path
+        else ImageFont.load_default(font_size)
+    )
+    return font.getbbox(text)
+
+
 # --- EXIF ---
 
 
@@ -396,7 +405,7 @@ def exif_from_image(image: Any) -> Any:
 
 
 def exif_get_item(exif: Any, tag: int) -> Any:
-    return exif[tag]
+    return exif.get(tag)
 
 
 def exif_set_item(exif: Any, tag: int, value: Any) -> None:
@@ -437,8 +446,11 @@ def sequence_frame_count(image: Any) -> int:
             image.seek(count)
             count += 1
     except EOFError:
-        image.seek(0)
-        return count
+        pass
+    finally:
+        if count > 0:
+            image.seek(0)
+    return count
 
 
 # --- ImageTransform ---
@@ -602,9 +614,17 @@ def watermark_add_text(
         else ImageFont.load_default(font_size)
     )
     alpha = int(_watermark_clamp_opacity(opacity) * 255)
-    draw.text((x, y), text, fill=(fill_r, fill_g, fill_b, alpha), font=font)
+    fill = (fill_r, fill_g, fill_b, alpha)
+    bbox = draw.textbbox((x, y), text, font=font)
+    draw.text((x, y), text, fill=fill, font=font)
     if angle != 0:
-        layer = layer.rotate(angle, resample=Image.Resampling.BICUBIC, expand=False)
+        center = ((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2)
+        layer = layer.rotate(
+            angle,
+            resample=Image.Resampling.BICUBIC,
+            center=center,
+            expand=False,
+        )
     result = Image.alpha_composite(base, layer)
     return result.convert(image.mode) if image.mode != "RGBA" else result
 
@@ -642,9 +662,17 @@ def watermark_remove_region(
     method: str = "blur",
     blur_radius: float = 12.0,
 ) -> Any:
+    if left >= right or top >= bottom:
+        msg = "Invalid watermark region: left < right and top < bottom are required"
+        raise ValueError(msg)
+
     result = image.copy()
     box = (left, top, right, bottom)
     region = result.crop(box)
+    if region.width == 0 or region.height == 0:
+        msg = "Watermark region must be non-empty"
+        raise ValueError(msg)
+
     if method == "blur":
         region = region.filter(ImageFilter.GaussianBlur(blur_radius))
     elif method == "median":
@@ -654,9 +682,8 @@ def watermark_remove_region(
         region = region.filter(ImageFilter.MedianFilter(size))
     elif method == "fill":
         stat = ImageStat.Stat(region)
-        bands = len(result.getbands())
-        fill = tuple(int(stat.mean[i]) for i in range(bands))
-        region = Image.new(result.mode, region.size, fill)
+        fill = tuple(int(v) for v in stat.mean)
+        region = Image.new(region.mode, region.size, fill)
     else:
         msg = f"Unknown watermark removal method: {method}"
         raise ValueError(msg)

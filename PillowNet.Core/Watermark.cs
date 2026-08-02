@@ -110,11 +110,11 @@ public static class Watermark
             return pos;
         }
 
-        IImageFont font = options.FontPath is not null
-            ? ImageFont.Truetype(options.FontPath, options.FontSize)
-            : ImageFont.LoadDefault(options.FontSize);
+        var box = ImageFont.GetTextBBox(
+            text,
+            options.FontPath,
+            options.FontSize);
 
-        var box = ImageFont.GetBBox(font, text);
         var textWidth = box.Right - box.Left;
         var textHeight = box.Bottom - box.Top;
 

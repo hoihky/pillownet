@@ -8,25 +8,55 @@ namespace PillowNet;
 /// </summary>
 public static class ImageFilter
 {
-    public static IImageFilter Blur => FromBridge(PillowEnvironment.Bridge.FilterBlur());
+    private static readonly Lazy<IImageFilter> BlurFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterBlur()));
 
-    public static IImageFilter Contour => FromBridge(PillowEnvironment.Bridge.FilterContour());
+    private static readonly Lazy<IImageFilter> ContourFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterContour()));
 
-    public static IImageFilter Detail => FromBridge(PillowEnvironment.Bridge.FilterDetail());
+    private static readonly Lazy<IImageFilter> DetailFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterDetail()));
 
-    public static IImageFilter EdgeEnhance => FromBridge(PillowEnvironment.Bridge.FilterEdgeEnhance());
+    private static readonly Lazy<IImageFilter> EdgeEnhanceFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterEdgeEnhance()));
 
-    public static IImageFilter EdgeEnhanceMore => FromBridge(PillowEnvironment.Bridge.FilterEdgeEnhanceMore());
+    private static readonly Lazy<IImageFilter> EdgeEnhanceMoreFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterEdgeEnhanceMore()));
 
-    public static IImageFilter Emboss => FromBridge(PillowEnvironment.Bridge.FilterEmboss());
+    private static readonly Lazy<IImageFilter> EmbossFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterEmboss()));
 
-    public static IImageFilter FindEdges => FromBridge(PillowEnvironment.Bridge.FilterFindEdges());
+    private static readonly Lazy<IImageFilter> FindEdgesFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterFindEdges()));
 
-    public static IImageFilter Sharpen => FromBridge(PillowEnvironment.Bridge.FilterSharpen());
+    private static readonly Lazy<IImageFilter> SharpenFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterSharpen()));
 
-    public static IImageFilter Smooth => FromBridge(PillowEnvironment.Bridge.FilterSmooth());
+    private static readonly Lazy<IImageFilter> SmoothFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterSmooth()));
 
-    public static IImageFilter SmoothMore => FromBridge(PillowEnvironment.Bridge.FilterSmoothMore());
+    private static readonly Lazy<IImageFilter> SmoothMoreFilter =
+        new(() => FromBridge(PillowEnvironment.Bridge.FilterSmoothMore()));
+
+    public static IImageFilter Blur => BlurFilter.Value;
+
+    public static IImageFilter Contour => ContourFilter.Value;
+
+    public static IImageFilter Detail => DetailFilter.Value;
+
+    public static IImageFilter EdgeEnhance => EdgeEnhanceFilter.Value;
+
+    public static IImageFilter EdgeEnhanceMore => EdgeEnhanceMoreFilter.Value;
+
+    public static IImageFilter Emboss => EmbossFilter.Value;
+
+    public static IImageFilter FindEdges => FindEdgesFilter.Value;
+
+    public static IImageFilter Sharpen => SharpenFilter.Value;
+
+    public static IImageFilter Smooth => SmoothFilter.Value;
+
+    public static IImageFilter SmoothMore => SmoothMoreFilter.Value;
 
     public static IImageFilter GaussianBlur(double radius = 2.0) =>
         FromBridge(PillowEnvironment.Bridge.FilterGaussianBlur(radius));

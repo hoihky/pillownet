@@ -8,6 +8,7 @@ A C# wrapper for [Pillow](https://python-pillow.org/) (PIL) using [CSnakes](http
 |---------|-------------|
 | **PillowNet.Core** | C# API (`Image`, `ImageFilter`, `ImageOps`, etc.) backed by an embedded Pillow runtime |
 | **PillowNet.Cli** | Command-line tool for common image processing tasks |
+| **PillowNet.Tests** | Automated regression tests (run on every test project build) |
 
 ## Prerequisites
 
@@ -19,6 +20,14 @@ A C# wrapper for [Pillow](https://python-pillow.org/) (PIL) using [CSnakes](http
 ```bash
 dotnet build
 ```
+
+## Test
+
+```bash
+dotnet test
+```
+
+Building `PillowNet.Tests` also runs the test suite automatically. Disable with `-p:RunTestsAfterBuild=false` if needed.
 
 ## Documentation
 

@@ -65,7 +65,7 @@ public sealed class ImageDraw : IDisposable
     public void Text(
         (int X, int Y) xy,
         string text,
-        int fill = 0,
+        object? fill = null,
         string? fontPath = null,
         int fontSize = 20)
     {
@@ -74,7 +74,7 @@ public sealed class ImageDraw : IDisposable
             Handle,
             (xy.X, xy.Y),
             text,
-            PyObject.From(fill),
+            ToPy(fill) ?? PyObject.From(0),
             fontPath,
             fontSize);
     }

@@ -29,7 +29,7 @@ public static class PillowEnvironment
                 return;
             }
 
-            homeDirectory ??= AppContext.BaseDirectory;
+            homeDirectory = ResolveHomeDirectory(homeDirectory);
             var venvPath = Path.Combine(homeDirectory, ".venv");
             var requirementsPath = Path.Combine(homeDirectory, "requirements.txt");
 
@@ -41,9 +41,21 @@ public static class PillowEnvironment
                 .WithPipInstaller(requirementsPath)
                 .FromRedistributable();
 
-            _host = builder.Build();
-            var environment = _host.Services.GetRequiredService<IPythonEnvironment>();
-            _bridge = environment.PillowBridge();
+            IHost? host = null;
+            try
+            {
+                host = builder.Build();
+                var environment = host.Services.GetRequiredService<IPythonEnvironment>();
+                _bridge = environment.PillowBridge();
+                _host = host;
+            }
+            catch
+            {
+                host?.Dispose();
+                _host = null;
+                _bridge = null;
+                throw;
+            }
         }
     }
 
@@ -59,4 +71,30 @@ public static class PillowEnvironment
             _bridge = null;
         }
     }
+
+    private static string ResolveHomeDirectory(string? homeDirectory)
+    {
+        if (homeDirectory is not null)
+        {
+            return homeDirectory;
+        }
+
+        var entryDir = AppContext.BaseDirectory;
+        if (HasRuntimeAssets(entryDir))
+        {
+            return entryDir;
+        }
+
+        var coreDir = Path.GetDirectoryName(typeof(PillowEnvironment).Assembly.Location)!;
+        if (HasRuntimeAssets(coreDir))
+        {
+            return coreDir;
+        }
+
+        return entryDir;
+    }
+
+    private static bool HasRuntimeAssets(string directory) =>
+        File.Exists(Path.Combine(directory, "pillow_bridge.py")) &&
+        File.Exists(Path.Combine(directory, "requirements.txt"));
 }

@@ -419,7 +419,7 @@ static Command DrawCommand()
         using var image = Image.Open(inputFile.FullName);
         using (var draw = new ImageDraw(image))
         {
-            draw.Text((px, py), label, fill: 0xFFFFFF, fontPath: fontPath, fontSize: size);
+            draw.Text((px, py), label, fill: (255, 255, 255), fontPath: fontPath, fontSize: size);
         }
 
         image.Save(outputFile.FullName);
@@ -444,7 +444,7 @@ static Command ExifCommand()
 
         PillowEnvironment.Initialize();
         using var image = Image.Open(inputFile.FullName);
-        var exif = image.GetExif();
+        using var exif = image.GetExif();
         var tags = exif.Tags;
         if (tags.Count == 0)
         {
@@ -587,11 +587,9 @@ static Command PixelCommand()
 
         image.PutPixel(px, py, setValue.Value);
         Console.WriteLine($"Set ({px}, {py}) = {setValue.Value}");
-        if (outputFile is not null)
-        {
-            image.Save(outputFile.FullName);
-            Console.WriteLine($"Saved {outputFile.FullName}");
-        }
+        var savePath = outputFile?.FullName ?? inputFile.FullName;
+        image.Save(savePath);
+        Console.WriteLine($"Saved {savePath}");
     });
 
     return command;
@@ -659,6 +657,10 @@ static Command WatermarkAddTextCommand()
         var label = parseResult.GetValue(text)!;
         var px = parseResult.GetValue(x);
         var py = parseResult.GetValue(y);
+        if (px is null ^ py is null)
+        {
+            throw new InvalidOperationException("Specify both --x and --y, or omit both to use --anchor.");
+        }
 
         PillowEnvironment.Initialize();
         var rgb = ImageColor.GetRgb(parseResult.GetValue(color)!);
@@ -731,6 +733,10 @@ static Command WatermarkAddImageCommand()
         var outputFile = parseResult.GetValue(output)!;
         var px = parseResult.GetValue(x);
         var py = parseResult.GetValue(y);
+        if (px is null ^ py is null)
+        {
+            throw new InvalidOperationException("Specify both --x and --y, or omit both to use --anchor.");
+        }
 
         var options = new WatermarkOptions
         {
