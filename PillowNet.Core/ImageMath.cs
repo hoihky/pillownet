@@ -11,6 +11,8 @@ public static class ImageMath
     /// </summary>
     public static Image Eval(string expression, Image? a = null, Image? b = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(expression);
+
         PyObject? aHandle = a?.Handle;
         PyObject? bHandle = b?.Handle;
         var result = PillowEnvironment.Bridge.ImagemathEval(

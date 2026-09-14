@@ -14,4 +14,14 @@ public sealed class ImageFilterRegressionTests
         Assert.Equal(12, second.Width);
         Assert.Equal(12, second.Height);
     }
+
+    [Fact]
+    public void TransientFilter_CanBeDisposedAfterUse()
+    {
+        using var image = Image.New("RGB", (12, 12), 0);
+        using var filter = ImageFilter.GaussianBlur(2.0);
+        using var filtered = image.Filter(filter);
+
+        Assert.Equal(12, filtered.Width);
+    }
 }

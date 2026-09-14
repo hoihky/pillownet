@@ -9,34 +9,34 @@ namespace PillowNet;
 public static class ImageFilter
 {
     private static readonly Lazy<IImageFilter> BlurFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterBlur()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterBlur()));
 
     private static readonly Lazy<IImageFilter> ContourFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterContour()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterContour()));
 
     private static readonly Lazy<IImageFilter> DetailFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterDetail()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterDetail()));
 
     private static readonly Lazy<IImageFilter> EdgeEnhanceFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterEdgeEnhance()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterEdgeEnhance()));
 
     private static readonly Lazy<IImageFilter> EdgeEnhanceMoreFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterEdgeEnhanceMore()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterEdgeEnhanceMore()));
 
     private static readonly Lazy<IImageFilter> EmbossFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterEmboss()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterEmboss()));
 
     private static readonly Lazy<IImageFilter> FindEdgesFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterFindEdges()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterFindEdges()));
 
     private static readonly Lazy<IImageFilter> SharpenFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterSharpen()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterSharpen()));
 
     private static readonly Lazy<IImageFilter> SmoothFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterSmooth()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterSmooth()));
 
     private static readonly Lazy<IImageFilter> SmoothMoreFilter =
-        new(() => FromBridge(PillowEnvironment.Bridge.FilterSmoothMore()));
+        new(() => Cached(PillowEnvironment.Bridge.FilterSmoothMore()));
 
     public static IImageFilter Blur => BlurFilter.Value;
 
@@ -59,30 +59,54 @@ public static class ImageFilter
     public static IImageFilter SmoothMore => SmoothMoreFilter.Value;
 
     public static IImageFilter GaussianBlur(double radius = 2.0) =>
-        FromBridge(PillowEnvironment.Bridge.FilterGaussianBlur(radius));
+        Transient(PillowEnvironment.Bridge.FilterGaussianBlur(radius));
 
     public static IImageFilter BoxBlur(double radius) =>
-        FromBridge(PillowEnvironment.Bridge.FilterBoxBlur(radius));
+        Transient(PillowEnvironment.Bridge.FilterBoxBlur(radius));
 
     public static IImageFilter UnsharpMask(double radius = 2.0, long percent = 150, long threshold = 3) =>
-        FromBridge(PillowEnvironment.Bridge.FilterUnsharpMask(radius, percent, threshold));
+        Transient(PillowEnvironment.Bridge.FilterUnsharpMask(radius, percent, threshold));
 
     public static IImageFilter Min(long size = 3) =>
-        FromBridge(PillowEnvironment.Bridge.FilterMin(size));
+        Transient(PillowEnvironment.Bridge.FilterMin(size));
 
     public static IImageFilter Max(long size = 3) =>
-        FromBridge(PillowEnvironment.Bridge.FilterMax(size));
+        Transient(PillowEnvironment.Bridge.FilterMax(size));
 
     public static IImageFilter Median(long size = 3) =>
-        FromBridge(PillowEnvironment.Bridge.FilterMedian(size));
+        Transient(PillowEnvironment.Bridge.FilterMedian(size));
 
     public static IImageFilter Mode(long size = 3) =>
-        FromBridge(PillowEnvironment.Bridge.FilterModeFilter(size));
+        Transient(PillowEnvironment.Bridge.FilterModeFilter(size));
 
-    private static ImageFilterHandle FromBridge(PyObject handle) => new(handle);
+    private static IImageFilter Cached(PyObject handle) => new CachedImageFilterHandle(handle);
 
-    private sealed class ImageFilterHandle(PyObject handle) : IImageFilter
+    private static IImageFilter Transient(PyObject handle) => new TransientImageFilterHandle(handle);
+
+    private sealed class CachedImageFilterHandle(PyObject handle) : IImageFilter
     {
         public PyObject Handle { get; } = handle;
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class TransientImageFilterHandle(PyObject handle) : IImageFilter
+    {
+        private bool _disposed;
+
+        public PyObject Handle { get; } = handle;
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            Handle.Dispose();
+            _disposed = true;
+        }
     }
 }

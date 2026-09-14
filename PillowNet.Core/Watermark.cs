@@ -93,8 +93,16 @@ public static class Watermark
         Image image,
         (int Left, int Top, int Right, int Bottom) box,
         WatermarkRemovalMethod method = WatermarkRemovalMethod.Blur,
-        double blurRadius = 12.0) =>
-        new(PillowEnvironment.Bridge.WatermarkRemoveRegion(
+        double blurRadius = 12.0)
+    {
+        if (box.Left >= box.Right || box.Top >= box.Bottom)
+        {
+            throw new ArgumentException(
+                "Invalid watermark region: left < right and top < bottom are required.",
+                nameof(box));
+        }
+
+        return new(PillowEnvironment.Bridge.WatermarkRemoveRegion(
             image.Handle,
             box.Left,
             box.Top,
@@ -102,6 +110,7 @@ public static class Watermark
             box.Bottom,
             method.ToString().ToLowerInvariant(),
             blurRadius));
+    }
 
     private static (int X, int Y) ResolveTextPosition(Image image, string text, WatermarkOptions options)
     {

@@ -639,6 +639,7 @@ def watermark_add_image(
 ) -> Any:
     base = image.convert("RGBA")
     wm = mark.convert("RGBA")
+    scale = max(0.0, scale)
     if scale != 1.0:
         new_size = (max(1, int(wm.width * scale)), max(1, int(wm.height * scale)))
         wm = wm.resize(new_size, resample=Image.Resampling.LANCZOS)

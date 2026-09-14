@@ -28,12 +28,14 @@ public sealed class ImageDraw : IDisposable
         int width = 1)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        PillowEnvironment.Bridge.DrawRectangle(
-            Handle,
-            (xy.Left, xy.Top, xy.Right, xy.Bottom),
-            ToPy(fill),
-            ToPy(outline),
-            width);
+        WithPy(fill, fillPy =>
+            WithPy(outline, outlinePy =>
+                PillowEnvironment.Bridge.DrawRectangle(
+                    Handle,
+                    (xy.Left, xy.Top, xy.Right, xy.Bottom),
+                    fillPy,
+                    outlinePy,
+                    width)));
     }
 
     public void Ellipse(
@@ -43,25 +45,28 @@ public sealed class ImageDraw : IDisposable
         int width = 1)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        PillowEnvironment.Bridge.DrawEllipse(
-            Handle,
-            (xy.Left, xy.Top, xy.Right, xy.Bottom),
-            ToPy(fill),
-            ToPy(outline),
-            width);
+        WithPy(fill, fillPy =>
+            WithPy(outline, outlinePy =>
+                PillowEnvironment.Bridge.DrawEllipse(
+                    Handle,
+                    (xy.Left, xy.Top, xy.Right, xy.Bottom),
+                    fillPy,
+                    outlinePy,
+                    width)));
     }
 
     public void Line(
         (int X0, int Y0, int X1, int Y1) xy,
-        int fill = 255,
+        object? fill = null,
         int width = 1)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        PillowEnvironment.Bridge.DrawLine(
-            Handle,
-            (xy.X0, xy.Y0, xy.X1, xy.Y1),
-            PyObject.From(fill),
-            width);
+        WithPy(fill ?? 0, fillPy =>
+            PillowEnvironment.Bridge.DrawLine(
+                Handle,
+                (xy.X0, xy.Y0, xy.X1, xy.Y1),
+                fillPy!,
+                width));
     }
 
     public void Text(
@@ -72,13 +77,14 @@ public sealed class ImageDraw : IDisposable
         int fontSize = 20)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        PillowEnvironment.Bridge.DrawText(
-            Handle,
-            (xy.X, xy.Y),
-            text,
-            ToPy(fill) ?? PyObject.From(0),
-            fontPath,
-            fontSize);
+        WithPy(fill ?? 0, fillPy =>
+            PillowEnvironment.Bridge.DrawText(
+                Handle,
+                (xy.X, xy.Y),
+                text,
+                fillPy!,
+                fontPath,
+                fontSize));
     }
 
     public void Text(
@@ -88,12 +94,13 @@ public sealed class ImageDraw : IDisposable
         object? fill = null)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        PillowEnvironment.Bridge.DrawTextWithFont(
-            Handle,
-            (xy.X, xy.Y),
-            text,
-            font.Handle,
-            ToPy(fill) ?? PyObject.From(0));
+        WithPy(fill ?? 0, fillPy =>
+            PillowEnvironment.Bridge.DrawTextWithFont(
+                Handle,
+                (xy.X, xy.Y),
+                text,
+                font.Handle,
+                fillPy!));
     }
 
     public void Dispose()
@@ -107,11 +114,21 @@ public sealed class ImageDraw : IDisposable
         _disposed = true;
     }
 
-    private static PyObject? ToPy(object? value) =>
-        value switch
+    private static void WithPy(object? value, Action<PyObject?> action)
+    {
+        if (value is null)
         {
-            null => null,
-            PyObject py => py,
-            _ => PyObject.From(value),
-        };
+            action(null);
+            return;
+        }
+
+        if (value is PyObject existing)
+        {
+            action(existing);
+            return;
+        }
+
+        using var created = PyObject.From(value);
+        action(created);
+    }
 }

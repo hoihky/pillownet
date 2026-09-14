@@ -172,7 +172,7 @@ static Command FilterCommand()
 
         PillowEnvironment.Initialize();
         using var image = Image.Open(inputFile.FullName);
-        var filter = ResolveFilter(name, r);
+        using var filter = ResolveFilter(name, r);
         using var filtered = image.Filter(filter);
         filtered.Save(outputFile.FullName);
         Console.WriteLine($"Applied {name} -> {outputFile.FullName}");
@@ -454,8 +454,7 @@ static Command ExifCommand()
 
         foreach (var tag in tags.OrderBy(t => t))
         {
-            using var value = exif.Get(tag);
-            Console.WriteLine($"0x{tag:X4} ({tag}): {value}");
+            Console.WriteLine($"0x{tag:X4} ({tag}): {exif.GetString(tag) ?? exif.GetNumber(tag)?.ToString() ?? "(null)"}");
         }
     });
 
@@ -580,8 +579,7 @@ static Command PixelCommand()
         using var image = Image.Open(inputFile.FullName);
         if (setValue is null)
         {
-            var pixel = image.GetPixel(px, py);
-            Console.WriteLine($"({px}, {py}) = {pixel}");
+            Console.WriteLine($"({px}, {py}) = {FormatPixel(image, px, py)}");
             return;
         }
 
@@ -837,6 +835,20 @@ static Command InfoCommand()
     });
 
     return command;
+}
+
+static string FormatPixel(Image image, int x, int y) =>
+    image.Mode switch
+    {
+        "L" => image.GetPixelGray(x, y).ToString(),
+        "RGB" or "RGBA" => string.Join(", ", image.GetPixelRgb(x, y)),
+        _ => FormatRawPixel(image, x, y),
+    };
+
+static string FormatRawPixel(Image image, int x, int y)
+{
+    using var pixel = image.GetPixel(x, y);
+    return pixel.ToString() ?? string.Empty;
 }
 
 static IImageFilter ResolveFilter(string name, double radius) =>

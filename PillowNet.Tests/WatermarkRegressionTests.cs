@@ -30,6 +30,15 @@ public sealed class WatermarkRegressionTests
     }
 
     [Fact]
+    public void RemoveRegion_InvalidBox_Throws()
+    {
+        using var image = Image.New("RGB", (40, 40), 0);
+
+        Assert.Throws<ArgumentException>(() =>
+            Watermark.RemoveRegion(image, (20, 20, 10, 30)));
+    }
+
+    [Fact]
     public void RemoveRegion_Fill_WorksOnGrayscale()
     {
         using var image = Image.New("L", (40, 40), 200);

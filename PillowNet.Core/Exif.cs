@@ -14,6 +14,8 @@ public sealed class Exif : IDisposable
 
     internal PyObject Handle { get; }
 
+    internal bool IsDisposed => _disposed;
+
     public bool Contains(ExifTag tag) => Contains((long)tag);
 
     public bool Contains(long tag)
@@ -28,7 +30,25 @@ public sealed class Exif : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         var value = PillowEnvironment.Bridge.ExifGetItem(Handle, tag);
-        return value is null || value.IsNone() ? null : value;
+        if (value is null || value.IsNone())
+        {
+            value?.Dispose();
+            return null;
+        }
+
+        return value;
+    }
+
+    public string? GetString(long tag)
+    {
+        using var value = Get(tag);
+        return value?.As<string>();
+    }
+
+    public long? GetNumber(long tag)
+    {
+        using var value = Get(tag);
+        return value is null ? null : value.As<long>();
     }
 
     public void Set(ExifTag tag, PyObject value) => Set((long)tag, value);
@@ -39,16 +59,22 @@ public sealed class Exif : IDisposable
         PillowEnvironment.Bridge.ExifSetItem(Handle, tag, value);
     }
 
-    public void Set(ExifTag tag, long value)
+    public void Set(ExifTag tag, long value) => Set((long)tag, value);
+
+    public void Set(long tag, long value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        PillowEnvironment.Bridge.ExifSetItem(Handle, (long)tag, PyObject.From(value));
+        using var pyValue = PyObject.From(value);
+        PillowEnvironment.Bridge.ExifSetItem(Handle, tag, pyValue);
     }
 
-    public void Set(ExifTag tag, string value)
+    public void Set(ExifTag tag, string value) => Set((long)tag, value);
+
+    public void Set(long tag, string value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        PillowEnvironment.Bridge.ExifSetItem(Handle, (long)tag, PyObject.From(value));
+        using var pyValue = PyObject.From(value);
+        PillowEnvironment.Bridge.ExifSetItem(Handle, tag, pyValue);
     }
 
     public IReadOnlyList<long> Tags

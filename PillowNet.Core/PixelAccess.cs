@@ -11,22 +11,28 @@ public static class PixelAccess
     public static PyObject GetPixel(Image image, int x, int y) =>
         PillowEnvironment.Bridge.PixelGet(image.Handle, x, y);
 
-    public static int GetPixelGray(Image image, int x, int y) =>
-        (int)PillowEnvironment.Bridge.PixelGet(image.Handle, x, y).As<long>();
+    public static int GetPixelGray(Image image, int x, int y)
+    {
+        using var pixel = PillowEnvironment.Bridge.PixelGet(image.Handle, x, y);
+        return (int)pixel.As<long>();
+    }
 
     public static (int R, int G, int B) GetPixelRgb(Image image, int x, int y)
     {
-        var pixel = PillowEnvironment.Bridge.PixelGet(image.Handle, x, y).As<(long, long, long)>();
-        return ((int)pixel.Item1, (int)pixel.Item2, (int)pixel.Item3);
+        using var pixel = PillowEnvironment.Bridge.PixelGet(image.Handle, x, y);
+        var components = pixel.As<(long, long, long)>();
+        return ((int)components.Item1, (int)components.Item2, (int)components.Item3);
     }
 
-    public static void PutPixel(Image image, int x, int y, long value) =>
-        PillowEnvironment.Bridge.PixelSet(image.Handle, x, y, PyObject.From(value));
+    public static void PutPixel(Image image, int x, int y, long value)
+    {
+        using var pixel = PyObject.From(value);
+        PillowEnvironment.Bridge.PixelSet(image.Handle, x, y, pixel);
+    }
 
-    public static void PutPixel(Image image, int x, int y, (int R, int G, int B) value) =>
-        PillowEnvironment.Bridge.PixelSet(
-            image.Handle,
-            x,
-            y,
-            PyObject.From((value.R, value.G, value.B)));
+    public static void PutPixel(Image image, int x, int y, (int R, int G, int B) value)
+    {
+        using var pixel = PyObject.From((value.R, value.G, value.B));
+        PillowEnvironment.Bridge.PixelSet(image.Handle, x, y, pixel);
+    }
 }

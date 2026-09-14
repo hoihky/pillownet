@@ -89,6 +89,11 @@ public sealed class Image : IDisposable
     {
         ThrowIfDisposed();
 
+        if (exif is not null)
+        {
+            ObjectDisposedException.ThrowIf(exif.IsDisposed, nameof(exif));
+        }
+
         if (format is null && exif is null)
         {
             using var save = Handle.GetAttr("save");
@@ -279,6 +284,20 @@ public sealed class Image : IDisposable
     {
         ThrowIfDisposed();
         return PixelAccess.GetPixel(this, x, y);
+    }
+
+    /// <summary>Gets a grayscale pixel value.</summary>
+    public int GetPixelGray(int x, int y)
+    {
+        ThrowIfDisposed();
+        return PixelAccess.GetPixelGray(this, x, y);
+    }
+
+    /// <summary>Gets an RGB pixel value.</summary>
+    public (int R, int G, int B) GetPixelRgb(int x, int y)
+    {
+        ThrowIfDisposed();
+        return PixelAccess.GetPixelRgb(this, x, y);
     }
 
     /// <summary>Sets a pixel value. Mirrors <c>Image.putpixel</c>.</summary>
