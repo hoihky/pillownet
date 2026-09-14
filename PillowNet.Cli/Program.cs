@@ -226,7 +226,11 @@ static Command EnhanceCommand()
             "equalize" => ImageOps.Equalize(image),
             "grayscale" => ImageOps.Grayscale(image),
             "invert" => ImageOps.Invert(image),
-            "posterize" => ImageOps.Posterize(image, posterizeBits),
+            "posterize" => ImageOps.Posterize(
+                image,
+                posterizeBits is < 1 or > 8
+                    ? throw new ArgumentOutOfRangeException(nameof(bits), "Posterize bits must be between 1 and 8.")
+                    : posterizeBits),
             "solarize" => ImageOps.Solarize(image, solarizeThreshold),
             "flip" => ImageOps.Flip(image),
             "mirror" => ImageOps.Mirror(image),

@@ -32,8 +32,40 @@ def image_open(fp: str) -> Any:
     return Image.open(fp)
 
 
-def image_new(mode: str, size: tuple[int, int], color: int = 0) -> Any:
+def image_new(mode: str, size: tuple[int, int], color: Any = 0) -> Any:
     return Image.new(mode, size, color)
+
+
+def image_getbbox(image: Any, alpha_only: bool = True) -> tuple[int, int, int, int] | None:
+    return image.getbbox(alpha_only=alpha_only)
+
+
+def image_tobytes(image: Any, encoder_name: str = "raw") -> bytes:
+    return image.tobytes(encoder_name)
+
+
+def image_getbands(image: Any) -> list[str]:
+    return list(image.getbands())
+
+
+def image_getchannel(image: Any, channel: int | str) -> Any:
+    return image.getchannel(channel)
+
+
+def image_quantize(
+    image: Any,
+    colors: int = 256,
+    method: int | None = None,
+) -> Any:
+    return image.quantize(colors=colors, method=method)
+
+
+def image_seek(image: Any, frame: int) -> None:
+    image.seek(frame)
+
+
+def image_tell(image: Any) -> int:
+    return image.tell()
 
 
 def image_frombytes(
@@ -573,6 +605,15 @@ def cms_get_open_profile(profile_path: str) -> Any:
 # --- ImageDraw (font object) ---
 
 
+def draw_polygon(
+    draw: Any,
+    xy: list[tuple[int, int]],
+    fill: Any = None,
+    outline: Any = None,
+) -> None:
+    draw.polygon(xy, fill=fill, outline=outline)
+
+
 def draw_text_with_font(
     draw: Any,
     xy: tuple[int, int],
@@ -581,6 +622,23 @@ def draw_text_with_font(
     fill: Any = 0,
 ) -> None:
     draw.text(xy, text, fill=fill, font=font)
+
+
+# --- ImageMorph ---
+
+
+def morphop_apply(image: Any, op_name: str) -> tuple[int, Any]:
+    from PIL import ImageMorph
+
+    op = ImageMorph.MorphOp(op_name=op_name)
+    return op.apply(image)
+
+
+def morphop_match(image: Any, op_name: str) -> list[tuple[int, int]]:
+    from PIL import ImageMorph
+
+    op = ImageMorph.MorphOp(op_name=op_name)
+    return op.match(image)
 
 
 # --- Watermark ---

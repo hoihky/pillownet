@@ -100,6 +100,23 @@ public sealed class Exif : IDisposable
             .ToArray();
     }
 
+    /// <summary>Reads IFD tags as strings, disposing Python handles internally.</summary>
+    public IReadOnlyList<(long Tag, string Value)> GetIfdStrings(ExifIfd group)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var items = PillowEnvironment.Bridge.ExifIfdItems(Handle, (long)group);
+        var result = new List<(long, string)>(items.Count);
+        foreach (var (tag, value) in items)
+        {
+            using (value)
+            {
+                result.Add((tag, value.As<string>()));
+            }
+        }
+
+        return result;
+    }
+
     public void Dispose()
     {
         if (_disposed)

@@ -1,89 +1,115 @@
 # PillowNet Feature Plan
 
-This document tracks Pillow module coverage and implementation phases.
+This document tracks Pillow module coverage, implementation phases, and research notes.
 
 ## Pillow module inventory
 
 | Python module | Purpose | PillowNet status |
 |---------------|---------|------------------|
-| `PIL.Image` | Core image type | **Wrapped** (core methods) |
+| `PIL.Image` | Core image type | **Wrapped** (core + Phase 4 extensions) |
 | `PIL.ImageFilter` | Convolution filters | **Wrapped** |
 | `PIL.ImageOps` | Common transforms | **Wrapped** (extended set) |
-| `PIL.ImageEnhance` | Tone adjustments | **Wrapped** (Phase 2) |
+| `PIL.ImageEnhance` | Tone adjustments | **Wrapped** |
 | `PIL.ImageChops` | Channel math | **Wrapped** (common ops) |
-| `PIL.ImageDraw` | Vector drawing | **Wrapped** (basic shapes) |
-| `PIL.ImageStat` | Statistics | **Wrapped** (Phase 2) |
-| `PIL.ImageFont` | Font objects | **Wrapped** (Phase 3) |
-| `PIL.ImageColor` | Color parsing | **Wrapped** (Phase 3) |
-| `PIL.ImageCms` | ICC / color management | **Wrapped** (Phase 3) |
-| `PIL.ImageMath` | Pixel expressions | **Wrapped** (Phase 3) |
-| `PIL.ImageMorph` | Morphology | Planned |
-| `PIL.ImageSequence` | Animation frames | **Wrapped** (Phase 3) |
-| `PIL.ExifTags` | EXIF constants | **Wrapped** (Phase 3) |
-| `PIL.ImageTransform` | Affine / perspective | **Wrapped** (Phase 3) |
+| `PIL.ImageDraw` | Vector drawing | **Wrapped** (shapes + polygon) |
+| `PIL.ImageStat` | Statistics | **Wrapped** |
+| `PIL.ImageFont` | Font objects | **Wrapped** |
+| `PIL.ImageColor` | Color parsing | **Wrapped** |
+| `PIL.ImageCms` | ICC / color management | **Wrapped** (basic) |
+| `PIL.ImageMath` | Pixel expressions | **Wrapped** |
+| `PIL.ImageMorph` | Morphology | **Wrapped** (named operators) |
+| `PIL.ImageSequence` | Animation frames | **Wrapped** |
+| `PIL.ExifTags` | EXIF constants | **Wrapped** |
+| `PIL.ImageTransform` | Affine / perspective | **Wrapped** |
 | `PIL.ImageQt` / `ImageTk` | GUI | Out of scope |
 | `PIL.ImageGrab` | Screen capture | Out of scope |
+| `PIL.ImageWin` | Windows DIB | Out of scope |
+| `PIL.PdfImagePlugin` etc. | Format plugins | Via `Image.Open` / `Save` |
 
-## Phase 1 (initial release)
+## Phase 1–3 (completed)
 
-- `Image`: Open, New, FromBytes, Save, Resize, Thumbnail, Convert, Filter, Rotate, Crop, Copy, Transpose
-- `ImageFilter`: all predefined + parameterized filters
-- `ImageOps`: autocontrast, equalize, grayscale, invert, posterize, solarize
-- CLI: convert, resize, thumbnail, filter, enhance, info
+See git history and [API.md](API.md) for the initial through watermark releases.
 
-## Phase 2 (completed)
+## Phase 4 (in progress)
 
-**Goal:** Cover the most common Pillow workflows missing from Phase 1.
+### Implemented
 
-### ImageEnhance
-- `Brightness`, `Contrast`, `Color`, `Sharpness` enhancers with `Enhance(factor)`
+**Image**
+- `GetBBox`, `ToBytes`, `GetBands`, `GetChannel`, `Quantize`, `Seek`, `Tell`
+- `New` with RGB tuple / object color (fixes int-only limitation)
 
-### ImageOps (extended)
-- `Flip`, `Mirror`, `ExifTranspose`, `Expand`, `Colorize`
-- `Fit`, `Pad`, `Contain`, `Cover` (aspect-ratio helpers)
+**ImageDraw**
+- `Polygon`
 
-### ImageChops
-- `Difference`, `Multiply`, `Add`, `Subtract`, `Blend`, `Composite`
-- `Lighter`, `Darker`, `Screen`, `Overlay`
+**ImageMorph**
+- `Apply`, `Match` with built-in operator names (`erosion4`, `dilation8`, `edge`, …)
 
-### Image methods
-- `Paste`, `AlphaComposite`, `Split`
+**Exif**
+- `GetIfdStrings` (managed read without leaking `PyObject`)
 
-### ImageDraw
-- `Rectangle`, `Ellipse`, `Line`, `Text` (optional TTF path)
+**Bug fixes**
+- `ImageColor.GetRgb` / `GetColor` dispose bridge handles
+- CLI `enhance --op Posterize` validates bits 1–8
 
-### ImageStat
-- `Mean`, `Extrema`, `Count`
+### Planned next (high value)
 
-### CLI
-- `adjust` (brightness/contrast/sharpness/color)
-- `flip` (horizontal/vertical)
-- `composite` (blend two images)
-- `draw` (text overlay)
+| Feature | Pillow API | Use case |
+|---------|------------|----------|
+| Save options | `Image.save(..., quality=, optimize=)` | JPEG/WebP output control |
+| Point transform | `Image.point()` | Thresholding, curves |
+| Histogram | `Image.histogram()` | Analysis, auto-levels |
+| Palette mode | `getpalette` / `putpalette` | GIF/PNG-P workflows |
+| Bulk pixels | `getdata` / `putdata` | Fast buffer I/O |
+| Draw extras | `arc`, `chord`, `pieslice`, `multiline_text` | Rich annotations |
+| ImageChops extras | `constant`, `offset`, `logical` ops | Compositing |
+| ImageOps extras | `scale`, `deform` | Thumbnails, warping |
+| ImageMorph LUT | `LutBuilder`, custom patterns | Custom morphology |
+| EXIF GPS | `ExifTags` GPS enum coverage | Location metadata |
+| Features probe | `PIL.features.check` | Runtime capability checks |
 
-## Phase 3 (implemented)
+### Lower priority / out of scope
 
-- `ImageFont` + `ImageColor` for rich text rendering
-- `Image.getexif()` / `ExifTags` for metadata read/write
-- `ImageSequence` for animated GIF/WebP frames
-- `ImageTransform` (Affine, Perspective, Extent, Quad)
-- `ImageMath` eval expressions
-- `PixelAccess` for fast pixel read/write
-- `ImageCms` profile transforms
+- `ImageGrab`, `ImageQt`, `ImageTk` (platform/GUI specific)
+- NumPy `fromarray` / `Image.fromarray` (add when buffer API exists)
+- `Image.show()` (requires GUI viewer)
 
-### CLI
-- `exif`, `frames`, `math`, `pixel`
-- `watermark-text`, `watermark-image`, `watermark-remove`
+## Research notes (Pillow 12.x)
 
-## Phase 4 (future)
+### Most-requested Image methods not yet wrapped
 
-- `ImageMorph` morphology operations
-- Extended `ExifTags` GPS/EXIF enum coverage
-- `PixelAccess` bulk buffer API
+1. **`point(lut, mode)`** — per-pixel lookup; essential for thresholding and tone curves.
+2. **`histogram()`** — returns 256×bands values; useful with `ImageStat` extensions.
+3. **`save` keyword args** — `quality`, `subsampling`, `lossless`, `duration` (GIF), `append_images`.
+4. **`getdata` / `putdata`** — iterator over flattened pixels; fastest path for bulk edits.
+5. **`reduce(factor)`** — fast downscale by integer factor.
+6. **`getpalette` / `putpalette`** — palette manipulation for `P` mode.
+7. **`transform` generic** — already partially covered by `ImageTransform`; generic `Image.transform` still missing.
+8. **`alpha_composite` / `paste` mask** — `paste` supports mask kwarg; not exposed yet.
+
+### ImageDraw gaps
+
+- `multiline_text`, `textbbox`, `textlength` on draw context
+- `arc`, `chord`, `pieslice`, `regular_polygon`
+
+### ImageFilter gaps
+
+- Custom `Kernel` / `RankFilter` construction
+- `ADD`, `SUBTRACT` etc. module-level constants (less common)
+
+### ImageMorph gaps
+
+- `LutBuilder` for custom patterns
+- `load_lut` / `save_lut` file I/O
+
+### Animation gaps
+
+- `ImageSequence.Iterator` lazy iteration (currently `AllFrames` copies all)
+- `save_all` / `append_images` for building GIFs from frames
 
 ## Design principles
 
 1. **Mirror Pillow semantics** — same defaults, same in-place vs copy behavior.
-2. **C# conventions** — PascalCase types/methods, `IDisposable` for images.
+2. **C# conventions** — PascalCase types/methods, `IDisposable` for images and transient handles.
 3. **Bridge vs PyObject** — factories in `pillow_bridge.py`; instance methods on `Image` via `PyObject`.
 4. **Minimal scope** — wrap what Pillow provides; don't reimplement algorithms in C#.
+5. **No handle leaks** — dispose `PyObject` temporaries; prefer managed return types where practical.

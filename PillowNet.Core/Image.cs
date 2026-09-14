@@ -27,7 +27,18 @@ public sealed class Image : IDisposable
 
     /// <summary>Creates a new image. Mirrors <c>PIL.Image.new</c>.</summary>
     public static Image New(string mode, (int Width, int Height) size, int color = 0) =>
-        new(PillowEnvironment.Bridge.ImageNew(mode, (size.Width, size.Height), color));
+        New(mode, size, (object)color);
+
+    /// <summary>Creates a new image with an RGB fill color.</summary>
+    public static Image New(string mode, (int Width, int Height) size, (int R, int G, int B) color) =>
+        New(mode, size, (object)color);
+
+    /// <summary>Creates a new image with a Pillow-compatible color value.</summary>
+    public static Image New(string mode, (int Width, int Height) size, object color)
+    {
+        using var colorHandle = ToColorPy(color);
+        return new(PillowEnvironment.Bridge.ImageNew(mode, (size.Width, size.Height), colorHandle));
+    }
 
     /// <summary>Creates an image from raw bytes. Mirrors <c>PIL.Image.frombytes</c>.</summary>
     public static Image FromBytes(string mode, (int Width, int Height) size, byte[] data) =>
@@ -314,6 +325,68 @@ public sealed class Image : IDisposable
         PixelAccess.PutPixel(this, x, y, value);
     }
 
+    /// <summary>Bounding box of non-zero pixels. Mirrors <c>Image.getbbox</c>.</summary>
+    public (int Left, int Top, int Right, int Bottom)? GetBBox(bool alphaOnly = true)
+    {
+        ThrowIfDisposed();
+        var box = PillowEnvironment.Bridge.ImageGetbbox(Handle, alphaOnly);
+        return box is null
+            ? null
+            : ((int)box.Value.Item1, (int)box.Value.Item2, (int)box.Value.Item3, (int)box.Value.Item4);
+    }
+
+    /// <summary>Raw image bytes. Mirrors <c>Image.tobytes</c>.</summary>
+    public byte[] ToBytes(string encoderName = "raw")
+    {
+        ThrowIfDisposed();
+        return PillowEnvironment.Bridge.ImageTobytes(Handle, encoderName);
+    }
+
+    /// <summary>Band names for this mode. Mirrors <c>Image.getbands</c>.</summary>
+    public IReadOnlyList<string> GetBands()
+    {
+        ThrowIfDisposed();
+        return PillowEnvironment.Bridge.ImageGetbands(Handle);
+    }
+
+    /// <summary>Extracts a single channel. Mirrors <c>Image.getchannel</c>.</summary>
+    public Image GetChannel(int channel)
+    {
+        ThrowIfDisposed();
+        return new(PillowEnvironment.Bridge.ImageGetchannel(Handle, PyObject.From(channel)));
+    }
+
+    /// <summary>Extracts a single channel by name. Mirrors <c>Image.getchannel</c>.</summary>
+    public Image GetChannel(string channel)
+    {
+        ThrowIfDisposed();
+        return new(PillowEnvironment.Bridge.ImageGetchannel(Handle, PyObject.From(channel)));
+    }
+
+    /// <summary>Quantizes to a palette image. Mirrors <c>Image.quantize</c>.</summary>
+    public Image Quantize(int colors = 256, QuantizeMethod? method = null)
+    {
+        ThrowIfDisposed();
+        return new(PillowEnvironment.Bridge.ImageQuantize(
+            Handle,
+            colors,
+            method is null ? null : (long)method.Value));
+    }
+
+    /// <summary>Seeks to an animation frame. Mirrors <c>Image.seek</c>.</summary>
+    public void Seek(int frame)
+    {
+        ThrowIfDisposed();
+        PillowEnvironment.Bridge.ImageSeek(Handle, frame);
+    }
+
+    /// <summary>Current animation frame index. Mirrors <c>Image.tell</c>.</summary>
+    public int Tell()
+    {
+        ThrowIfDisposed();
+        return (int)PillowEnvironment.Bridge.ImageTell(Handle);
+    }
+
     public void Dispose()
     {
         if (_disposed)
@@ -331,4 +404,13 @@ public sealed class Image : IDisposable
             _disposed = true;
         }
     }
+
+    private static PyObject ToColorPy(object color) =>
+        color switch
+        {
+            PyObject py => py,
+            (int r, int g, int b) => PyObject.From((r, g, b)),
+            int i => PyObject.From(i),
+            _ => PyObject.From(color),
+        };
 }

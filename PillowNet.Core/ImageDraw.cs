@@ -55,6 +55,24 @@ public sealed class ImageDraw : IDisposable
                     width)));
     }
 
+    public void Polygon(
+        IReadOnlyList<(int X, int Y)> points,
+        object? fill = null,
+        object? outline = null)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var coordinates = points
+            .Select(p => ((long)p.X, (long)p.Y))
+            .ToArray();
+        WithPy(fill, fillPy =>
+            WithPy(outline, outlinePy =>
+                PillowEnvironment.Bridge.DrawPolygon(
+                    Handle,
+                    coordinates,
+                    fillPy,
+                    outlinePy)));
+    }
+
     public void Line(
         (int X0, int Y0, int X1, int Y1) xy,
         object? fill = null,
