@@ -1,3 +1,5 @@
+using CSnakes.Runtime.Python;
+
 namespace PillowNet;
 
 /// <summary>
@@ -23,7 +25,7 @@ public static class ImageEnhance
 }
 
 /// <summary>Adjust brightness. Mirrors <c>ImageEnhance.Brightness</c>.</summary>
-public sealed class BrightnessEnhancer
+public sealed class BrightnessEnhancer : IDisposable
 {
     private readonly PyEnhancer _enhancer;
 
@@ -31,10 +33,12 @@ public sealed class BrightnessEnhancer
         _enhancer = new PyEnhancer(PillowEnvironment.Bridge.EnhanceBrightnessCreate(image.Handle));
 
     public Image Enhance(double factor) => _enhancer.Apply(factor);
+
+    public void Dispose() => _enhancer.Dispose();
 }
 
 /// <summary>Adjust contrast. Mirrors <c>ImageEnhance.Contrast</c>.</summary>
-public sealed class ContrastEnhancer
+public sealed class ContrastEnhancer : IDisposable
 {
     private readonly PyEnhancer _enhancer;
 
@@ -42,10 +46,12 @@ public sealed class ContrastEnhancer
         _enhancer = new PyEnhancer(PillowEnvironment.Bridge.EnhanceContrastCreate(image.Handle));
 
     public Image Enhance(double factor) => _enhancer.Apply(factor);
+
+    public void Dispose() => _enhancer.Dispose();
 }
 
 /// <summary>Adjust color balance. Mirrors <c>ImageEnhance.Color</c>.</summary>
-public sealed class ColorEnhancer
+public sealed class ColorEnhancer : IDisposable
 {
     private readonly PyEnhancer _enhancer;
 
@@ -53,10 +59,12 @@ public sealed class ColorEnhancer
         _enhancer = new PyEnhancer(PillowEnvironment.Bridge.EnhanceColorCreate(image.Handle));
 
     public Image Enhance(double factor) => _enhancer.Apply(factor);
+
+    public void Dispose() => _enhancer.Dispose();
 }
 
 /// <summary>Adjust sharpness. Mirrors <c>ImageEnhance.Sharpness</c>.</summary>
-public sealed class SharpnessEnhancer
+public sealed class SharpnessEnhancer : IDisposable
 {
     private readonly PyEnhancer _enhancer;
 
@@ -64,12 +72,32 @@ public sealed class SharpnessEnhancer
         _enhancer = new PyEnhancer(PillowEnvironment.Bridge.EnhanceSharpnessCreate(image.Handle));
 
     public Image Enhance(double factor) => _enhancer.Apply(factor);
+
+    public void Dispose() => _enhancer.Dispose();
 }
 
-internal sealed class PyEnhancer(CSnakes.Runtime.Python.PyObject handle)
+internal sealed class PyEnhancer : IDisposable
 {
-    internal CSnakes.Runtime.Python.PyObject Handle { get; } = handle;
+    private bool _disposed;
+
+    internal PyEnhancer(PyObject handle)
+    {
+        Handle = handle;
+    }
+
+    internal PyObject Handle { get; }
 
     internal Image Apply(double factor) =>
         new(PillowEnvironment.Bridge.EnhanceApply(Handle, factor));
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        Handle.Dispose();
+        _disposed = true;
+    }
 }

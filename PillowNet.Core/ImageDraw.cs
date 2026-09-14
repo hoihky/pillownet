@@ -11,6 +11,8 @@ public sealed class ImageDraw : IDisposable
 
     public ImageDraw(Image image)
     {
+        ArgumentNullException.ThrowIfNull(image);
+        ObjectDisposedException.ThrowIf(image.IsDisposed, image);
         Image = image;
         Handle = PillowEnvironment.Bridge.DrawCreate(image.Handle);
     }
@@ -83,7 +85,7 @@ public sealed class ImageDraw : IDisposable
         (int X, int Y) xy,
         string text,
         IImageFont font,
-        int fill = 0)
+        object? fill = null)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         PillowEnvironment.Bridge.DrawTextWithFont(
@@ -91,7 +93,7 @@ public sealed class ImageDraw : IDisposable
             (xy.X, xy.Y),
             text,
             font.Handle,
-            PyObject.From(fill));
+            ToPy(fill) ?? PyObject.From(0));
     }
 
     public void Dispose()

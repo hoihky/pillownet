@@ -45,4 +45,21 @@ public sealed class ImageRegressionTests
 
         Assert.Equal(200, pixel);
     }
+
+    [Fact]
+    public void PutPixel_GetPixel_RoundtripsOnRgb()
+    {
+        using var image = Image.New("RGB", (4, 4), 0);
+
+        image.PutPixel(1, 2, (10, 20, 30));
+        var pixel = PixelAccess.GetPixelRgb(image, 1, 2);
+
+        Assert.Equal((10, 20, 30), pixel);
+    }
+
+    [Fact]
+    public void Merge_EmptyBands_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => Image.Merge("RGB", Array.Empty<Image>()));
+    }
 }

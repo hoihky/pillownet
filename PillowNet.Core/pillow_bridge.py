@@ -682,7 +682,10 @@ def watermark_remove_region(
         region = region.filter(ImageFilter.MedianFilter(size))
     elif method == "fill":
         stat = ImageStat.Stat(region)
-        fill = tuple(int(v) for v in stat.mean)
+        mean = stat.mean
+        fill: int | tuple[int, ...] = (
+            int(mean[0]) if len(mean) == 1 else tuple(int(v) for v in mean)
+        )
         region = Image.new(region.mode, region.size, fill)
     else:
         msg = f"Unknown watermark removal method: {method}"

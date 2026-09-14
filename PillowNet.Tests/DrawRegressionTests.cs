@@ -18,4 +18,13 @@ public sealed class DrawRegressionTests
 
         Assert.NotEqual(before, after);
     }
+
+    [Fact]
+    public void Constructor_OnDisposedImage_Throws()
+    {
+        var image = Image.New("RGB", (8, 8), 0);
+        image.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => new ImageDraw(image));
+    }
 }

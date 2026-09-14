@@ -17,6 +17,8 @@ public sealed class Image : IDisposable
 
     internal PyObject Handle { get; }
 
+    internal bool IsDisposed => _disposed;
+
     private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(_disposed, this);
 
     /// <summary>Opens an image file. Mirrors <c>PIL.Image.open</c>.</summary>
@@ -36,7 +38,8 @@ public sealed class Image : IDisposable
         get
         {
             ThrowIfDisposed();
-            return (int)Handle.GetAttr("width").As<long>();
+            using var width = Handle.GetAttr("width");
+            return (int)width.As<long>();
         }
     }
 
@@ -45,7 +48,8 @@ public sealed class Image : IDisposable
         get
         {
             ThrowIfDisposed();
-            return (int)Handle.GetAttr("height").As<long>();
+            using var height = Handle.GetAttr("height");
+            return (int)height.As<long>();
         }
     }
 
@@ -54,8 +58,9 @@ public sealed class Image : IDisposable
         get
         {
             ThrowIfDisposed();
-            var size = Handle.GetAttr("size").As<(long, long)>();
-            return ((int)size.Item1, (int)size.Item2);
+            using var size = Handle.GetAttr("size");
+            var dimensions = size.As<(long, long)>();
+            return ((int)dimensions.Item1, (int)dimensions.Item2);
         }
     }
 
@@ -64,7 +69,8 @@ public sealed class Image : IDisposable
         get
         {
             ThrowIfDisposed();
-            return Handle.GetAttr("mode").As<string>();
+            using var mode = Handle.GetAttr("mode");
+            return mode.As<string>();
         }
     }
 
@@ -81,17 +87,19 @@ public sealed class Image : IDisposable
     /// <summary>Saves the image. Mirrors <c>Image.save</c>.</summary>
     public void Save(string path, string? format = null, Exif? exif = null)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
 
         if (format is null && exif is null)
         {
-            Handle.GetAttr("save").Call(PyObject.From(path));
+            using var save = Handle.GetAttr("save");
+            save.Call(PyObject.From(path));
             return;
         }
 
         if (format is not null && exif is null)
         {
-            Handle.GetAttr("save").CallWithKeywordArguments(
+            using var save = Handle.GetAttr("save");
+            save.CallWithKeywordArguments(
                 args: [PyObject.From(path)],
                 kwnames: ["format"],
                 kwvalues: [PyObject.From(format)]);
@@ -100,14 +108,16 @@ public sealed class Image : IDisposable
 
         if (format is null && exif is not null)
         {
-            Handle.GetAttr("save").CallWithKeywordArguments(
+            using var save = Handle.GetAttr("save");
+            save.CallWithKeywordArguments(
                 args: [PyObject.From(path)],
                 kwnames: ["exif"],
                 kwvalues: [PyObject.From(exif.ToBytes())]);
             return;
         }
 
-        Handle.GetAttr("save").CallWithKeywordArguments(
+        using var saveWithExif = Handle.GetAttr("save");
+        saveWithExif.CallWithKeywordArguments(
             args: [PyObject.From(path)],
             kwnames: ["format", "exif"],
             kwvalues: [PyObject.From(format!), PyObject.From(exif!.ToBytes())]);
@@ -116,9 +126,10 @@ public sealed class Image : IDisposable
     /// <summary>Resizes the image. Mirrors <c>Image.resize</c>.</summary>
     public Image Resize((int Width, int Height) size, Resampling resample = Resampling.Bicubic)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
 
-        var result = Handle.GetAttr("resize").Call(
+        using var resize = Handle.GetAttr("resize");
+        var result = resize.Call(
             PyObject.From((size.Width, size.Height)),
             PyObject.From((long)resample));
 
@@ -131,9 +142,10 @@ public sealed class Image : IDisposable
     /// </summary>
     public void Thumbnail((int Width, int Height) size, Resampling resample = Resampling.Bicubic)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
 
-        Handle.GetAttr("thumbnail").Call(
+        using var thumbnail = Handle.GetAttr("thumbnail");
+        thumbnail.Call(
             PyObject.From((size.Width, size.Height)),
             PyObject.From((long)resample));
     }
@@ -141,25 +153,28 @@ public sealed class Image : IDisposable
     /// <summary>Converts the image mode. Mirrors <c>Image.convert</c>.</summary>
     public Image Convert(string mode)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        var result = Handle.GetAttr("convert").Call(PyObject.From(mode));
+        ThrowIfDisposed();
+        using var convert = Handle.GetAttr("convert");
+        var result = convert.Call(PyObject.From(mode));
         return new Image(result);
     }
 
     /// <summary>Applies a filter. Mirrors <c>Image.filter</c>.</summary>
     public Image Filter(IImageFilter filter)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        var result = Handle.GetAttr("filter").Call(filter.Handle);
+        ThrowIfDisposed();
+        using var filterMethod = Handle.GetAttr("filter");
+        var result = filterMethod.Call(filter.Handle);
         return new Image(result);
     }
 
     /// <summary>Rotates the image. Mirrors <c>Image.rotate</c>.</summary>
     public Image Rotate(double angle, Resampling resample = Resampling.Bicubic, bool expand = false)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
 
-        var result = Handle.GetAttr("rotate").CallWithKeywordArguments(
+        using var rotate = Handle.GetAttr("rotate");
+        var result = rotate.CallWithKeywordArguments(
             args: [PyObject.From(angle)],
             kwnames: ["resample", "expand"],
             kwvalues: [PyObject.From((long)resample), PyObject.From(expand)]);
@@ -170,9 +185,10 @@ public sealed class Image : IDisposable
     /// <summary>Crops the image. Mirrors <c>Image.crop</c>.</summary>
     public Image Crop((int Left, int Top, int Right, int Bottom) box)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
 
-        var result = Handle.GetAttr("crop").Call(
+        using var crop = Handle.GetAttr("crop");
+        var result = crop.Call(
             PyObject.From((box.Left, box.Top, box.Right, box.Bottom)));
 
         return new Image(result);
@@ -181,30 +197,33 @@ public sealed class Image : IDisposable
     /// <summary>Returns a copy. Mirrors <c>Image.copy</c>.</summary>
     public Image Copy()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        return new Image(Handle.GetAttr("copy").Call());
+        ThrowIfDisposed();
+        using var copy = Handle.GetAttr("copy");
+        return new Image(copy.Call());
     }
 
     /// <summary>Transposes the image. Mirrors <c>Image.transpose</c>.</summary>
     public Image Transpose(Transpose method)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        var result = Handle.GetAttr("transpose").Call(PyObject.From((long)method));
+        ThrowIfDisposed();
+        using var transpose = Handle.GetAttr("transpose");
+        var result = transpose.Call(PyObject.From((long)method));
         return new Image(result);
     }
 
     /// <summary>Pastes another image into this one. Mirrors <c>Image.paste</c>.</summary>
     public void Paste(Image im, (int X, int Y)? position = null)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
 
+        using var paste = Handle.GetAttr("paste");
         if (position is null)
         {
-            Handle.GetAttr("paste").Call(im.Handle);
+            paste.Call(im.Handle);
             return;
         }
 
-        Handle.GetAttr("paste").Call(
+        paste.Call(
             im.Handle,
             PyObject.From((position.Value.X, position.Value.Y)));
     }
@@ -212,8 +231,9 @@ public sealed class Image : IDisposable
     /// <summary>Composites with alpha onto this image. Mirrors <c>Image.alpha_composite</c>.</summary>
     public void AlphaComposite(Image im, (int X, int Y) dest = default)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        Handle.GetAttr("alpha_composite").CallWithKeywordArguments(
+        ThrowIfDisposed();
+        using var alphaComposite = Handle.GetAttr("alpha_composite");
+        alphaComposite.CallWithKeywordArguments(
             args: [im.Handle],
             kwnames: ["dest"],
             kwvalues: [PyObject.From((dest.X, dest.Y))]);
@@ -222,7 +242,7 @@ public sealed class Image : IDisposable
     /// <summary>Splits into individual bands. Mirrors <c>Image.split</c>.</summary>
     public IReadOnlyList<Image> Split()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
         using var bands = Handle.GetAttr("split").Call();
         return bands.AsEnumerable<PyObject>().Select(b => new Image(b)).ToArray();
     }
@@ -230,6 +250,12 @@ public sealed class Image : IDisposable
     /// <summary>Merges bands into one image. Mirrors <c>PIL.Image.merge</c>.</summary>
     public static Image Merge(string mode, IReadOnlyList<Image> bands)
     {
+        ArgumentNullException.ThrowIfNull(bands);
+        if (bands.Count == 0)
+        {
+            throw new ArgumentException("At least one band is required.", nameof(bands));
+        }
+
         var handles = bands.Select(b => b.Handle).ToArray();
         return new Image(PillowEnvironment.Bridge.ImageMerge(mode, handles));
     }
@@ -257,6 +283,13 @@ public sealed class Image : IDisposable
 
     /// <summary>Sets a pixel value. Mirrors <c>Image.putpixel</c>.</summary>
     public void PutPixel(int x, int y, long value)
+    {
+        ThrowIfDisposed();
+        PixelAccess.PutPixel(this, x, y, value);
+    }
+
+    /// <summary>Sets an RGB pixel value on RGB/RGBA images.</summary>
+    public void PutPixel(int x, int y, (int R, int G, int B) value)
     {
         ThrowIfDisposed();
         PixelAccess.PutPixel(this, x, y, value);

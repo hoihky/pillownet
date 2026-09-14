@@ -454,7 +454,7 @@ static Command ExifCommand()
 
         foreach (var tag in tags.OrderBy(t => t))
         {
-            var value = exif.Get(tag);
+            using var value = exif.Get(tag);
             Console.WriteLine($"0x{tag:X4} ({tag}): {value}");
         }
     });

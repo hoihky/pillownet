@@ -28,4 +28,18 @@ public sealed class WatermarkRegressionTests
         Assert.Equal(100, result.Height);
         Assert.Equal("RGB", result.Mode);
     }
+
+    [Fact]
+    public void RemoveRegion_Fill_WorksOnGrayscale()
+    {
+        using var image = Image.New("L", (40, 40), 200);
+        using var result = Watermark.RemoveRegion(
+            image,
+            (10, 10, 30, 30),
+            WatermarkRemovalMethod.Fill);
+
+        Assert.Equal(40, result.Width);
+        Assert.Equal(40, result.Height);
+        Assert.Equal("L", result.Mode);
+    }
 }
