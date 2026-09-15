@@ -1,4 +1,7 @@
-# PillowNet API Reference
+---
+title: API Reference
+order: 10
+---
 
 PillowNet exposes [Pillow](https://python-pillow.org/) (PIL) to .NET through [CSnakes](https://tonybaloney.github.io/CSnakes/). The public API mirrors Pillow's module layout and behavior, with C# naming conventions applied on top.
 
@@ -215,21 +218,21 @@ canvas.Save("drawing.png");
 Optional TrueType font:
 
 ```csharp
-draw.Text((10, 10), "Title", fill: 0x000000, fontPath: "/path/to/font.ttf", fontSize: 24);
+draw.Text((10, 10), "Title", fill: 0x000000, fontPath: "fonts/MyFont.ttf", fontSize: 24);
 ```
 
 ---
 
 ## Phase 2 — completed
 
-See [FEATURES.md](./FEATURES.md).
+See [Feature plan](features.md).
 
 ---
 
 ## ImageFont & ImageColor
 
 ```csharp
-var font = ImageFont.Truetype("/path/to/font.ttf", size: 24);
+var font = ImageFont.Truetype("fonts/MyFont.ttf", size: 24);
 var (l, t, r, b) = ImageFont.GetBBox(font, "Metrics");
 double width = ImageFont.GetLength(font, "Hello");
 
@@ -515,7 +518,7 @@ Python exceptions become `CSnakes.Runtime.PythonInvocationException` with the or
 
 ## Feature roadmap
 
-See [FEATURES.md](./FEATURES.md) for the full Pillow coverage plan and what was added in each phase.
+See [Feature plan](features.md) for the full Pillow coverage plan and what was added in each phase.
 
 ### Currently wrapped
 

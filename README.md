@@ -34,8 +34,17 @@ Building `PillowNet.Tests` also runs the test suite automatically. Disable with 
 
 ## Documentation
 
-- [API Reference & internals](docs/API.md)
-- [Feature roadmap](docs/FEATURES.md)
+- [Project introduction](docs/index.html)
+- [API Reference & internals](docs/api.html)
+- [Feature roadmap](docs/features.html)
+
+Regenerate HTML from markdown (requires [MDWeb](https://github.com/hoihky/MDWeb) as a sibling repo):
+
+```bash
+./docs/build-docs.sh
+```
+
+Markdown sources live in `docs/pages/`.
 
 ## CLI Usage
 

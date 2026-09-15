@@ -293,6 +293,9 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
+# MDWeb doc build output
+docs/_build/
+
 # Visual Studio 6 build log
 *.plg
 

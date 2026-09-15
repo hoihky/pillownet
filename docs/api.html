@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API Reference · PillowNet</title>
+  <meta name="description" content="C# wrapper for Pillow via CSnakes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="stylesheet" href="assets/vendor/atom-one-dark.min.css">
+</head>
+<body>
+  <div class="site">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">☰</button>
+      <a href="index.html" class="brand">PillowNet</a>
+      <nav class="topbar-nav" aria-label="Primary">
+        <a href="index.html">Overview</a>
+        <a href="https://github.com/hoihky/pillownet" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="search-wrap">
+        <input type="search" id="search" placeholder="Search docs…" autocomplete="off">
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <nav class="nav" aria-label="Documentation">
+          <ul class="nav-list">
+            <li class="nav-item depth-0">
+              <a href="index.html" class="nav-link">Overview</a>
+            </li>
+            
+                        <li class="nav-item depth-0 is-active">
+                          
+                            <a href="api.html" class="nav-link">API Reference</a>
+                            
+                        </li>
+                        
+                        <li class="nav-item depth-0">
+                          
+                            <a href="features.html" class="nav-link">Feature Plan</a>
+                            
+                        </li>
+                        
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <article class="doc">
+          <header class="doc-header">
+            <h1>API Reference</h1>
+          </header>
+          <div class="doc-body"><p>PillowNet exposes <a href="https://python-pillow.org/">Pillow</a> (PIL) to .NET through <a href="https://tonybaloney.github.io/CSnakes/">CSnakes</a>. The public API mirrors Pillow's module layout and behavior, with C# naming conventions applied on top.</p>
+<h2 id="getting-started">Getting started</h2>
+<p>Every application must initialize the embedded Python runtime once before calling any API:</p>
+<pre><code class="language-csharp">using PillowNet;
+
+PillowEnvironment.Initialize();
+
+using var image = Image.Open("photo.jpg");
+Console.WriteLine($"{image.Width}x{image.Height} {image.Mode}");
+</code></pre>
+<p>Call <code>PillowEnvironment.Shutdown()</code> when tearing down a long-running host (optional for CLI tools).</p>
+<p>On first run, CSnakes downloads CPython 3.12, creates a <code>.venv</code> beside your binaries, and <code>pip install</code>s <code>requirements.txt</code> (Pillow).</p>
+<hr>
+<h2 id="api-overview">API overview</h2>
+<table class="table">
+<thead>
+<tr>
+<th>C# type</th>
+<th>Python equivalent</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Image</code></td>
+<td><code>PIL.Image.Image</code></td>
+<td>Core image type</td>
+</tr>
+<tr>
+<td><code>ImageFilter</code></td>
+<td><code>PIL.ImageFilter</code></td>
+<td>Convolution / rank filters</td>
+</tr>
+<tr>
+<td><code>ImageOps</code></td>
+<td><code>PIL.ImageOps</code></td>
+<td>High-level transforms</td>
+</tr>
+<tr>
+<td><code>ImageEnhance</code></td>
+<td><code>PIL.ImageEnhance</code></td>
+<td>Brightness, contrast, color, sharpness</td>
+</tr>
+<tr>
+<td><code>ImageChops</code></td>
+<td><code>PIL.ImageChops</code></td>
+<td>Per-pixel channel operations</td>
+</tr>
+<tr>
+<td><code>ImageDraw</code></td>
+<td><code>PIL.ImageDraw.Draw</code></td>
+<td>In-place vector drawing</td>
+</tr>
+<tr>
+<td><code>ImageStat</code></td>
+<td><code>PIL.ImageStat.Stat</code></td>
+<td>Pixel statistics</td>
+</tr>
+<tr>
+<td><code>ImageFont</code></td>
+<td><code>PIL.ImageFont</code></td>
+<td>TrueType / default fonts</td>
+</tr>
+<tr>
+<td><code>ImageColor</code></td>
+<td><code>PIL.ImageColor</code></td>
+<td>CSS-style color parsing</td>
+</tr>
+<tr>
+<td><code>Exif</code> / <code>ExifTag</code></td>
+<td><code>PIL.Image.Exif</code> / <code>ExifTags</code></td>
+<td>EXIF read/write</td>
+</tr>
+<tr>
+<td><code>ImageSequence</code></td>
+<td><code>PIL.ImageSequence</code></td>
+<td>Animation frames</td>
+</tr>
+<tr>
+<td><code>ImageTransform</code></td>
+<td><code>PIL.ImageTransform</code></td>
+<td>Affine / perspective</td>
+</tr>
+<tr>
+<td><code>ImageMath</code></td>
+<td><code>PIL.ImageMath</code></td>
+<td>Pixel expressions</td>
+</tr>
+<tr>
+<td><code>PixelAccess</code></td>
+<td><code>Image.getpixel</code> / <code>putpixel</code></td>
+<td>Single-pixel I/O</td>
+</tr>
+<tr>
+<td><code>ImageCms</code></td>
+<td><code>PIL.ImageCms</code></td>
+<td>ICC profile transforms</td>
+</tr>
+<tr>
+<td><code>Watermark</code></td>
+<td>(PillowNet)</td>
+<td>Text/image overlay &amp; region removal</td>
+</tr>
+<tr>
+<td><code>Resampling</code></td>
+<td><code>PIL.Image.Resampling</code></td>
+<td>Resize / rotate filters</td>
+</tr>
+<tr>
+<td><code>Transpose</code></td>
+<td><code>PIL.Image.Transpose</code></td>
+<td>Flip / rotate shortcuts</td>
+</tr>
+</tbody>
+</table>
+<h3 id="naming-conventions">Naming conventions</h3>
+<table class="table">
+<thead>
+<tr>
+<th>Python</th>
+<th>C#</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Image.open(path)</code></td>
+<td><code>Image.Open(path)</code></td>
+</tr>
+<tr>
+<td><code>image.resize(size)</code></td>
+<td><code>image.Resize(size)</code></td>
+</tr>
+<tr>
+<td><code>ImageFilter.GaussianBlur(radius=2)</code></td>
+<td><code>ImageFilter.GaussianBlur(radius: 2)</code></td>
+</tr>
+<tr>
+<td><code>image_open</code> (bridge fn)</td>
+<td><code>IPillowBridge.ImageOpen</code> (generated)</td>
+</tr>
+<tr>
+<td><code>snake_case</code> args</td>
+<td><code>camelCase</code> args in generated bridge calls</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="image">Image</h2>
+<h3 id="factory-methods">Factory methods</h3>
+<pre><code class="language-csharp">// Open from disk (identifies format from file contents)
+using var im = Image.Open("input.png");
+
+// Blank canvas
+using var blank = Image.New("RGB", (800, 600), color: 0xFFFFFF);
+
+// From raw pixel bytes
+byte[] pixels = /* width * height * bands */;
+using var raw = Image.FromBytes("RGB", (width, height), pixels);
+</code></pre>
+<h3 id="properties">Properties</h3>
+<pre><code class="language-csharp">int w = im.Width;
+int h = im.Height;
+(int Width, int Height) size = im.Size;
+string mode = im.Mode;           // "RGB", "RGBA", "L", …
+string? fmt = im.Format;         // "PNG", "JPEG", … or null
+</code></pre>
+<h3 id="transform-methods-return-new-image">Transform methods (return new <code>Image</code>)</h3>
+<pre><code class="language-csharp">using var resized = im.Resize((400, 300), Resampling.Lanczos);
+using var rotated = im.Rotate(45, expand: true);
+using var cropped = im.Crop((10, 10, 200, 200));   // left, top, right, bottom
+using var converted = im.Convert("RGBA");
+using var flipped = im.Transpose(Transpose.FlipLeftRight);
+using var copy = im.Copy();
+using var blurred = im.Filter(ImageFilter.GaussianBlur(3));
+</code></pre>
+<h3 id="in-place-methods">In-place methods</h3>
+<pre><code class="language-csharp">im.Thumbnail((128, 128));   // preserves aspect ratio, modifies im
+im.Paste(overlay, (x, y));  // paste another image at offset
+im.AlphaComposite(overlay, dest: (0, 0));
+</code></pre>
+<h3 id="io">I/O</h3>
+<pre><code class="language-csharp">im.Save("out.jpg");
+im.Save("out.webp", format: "WEBP");
+</code></pre>
+<h3 id="disposal">Disposal</h3>
+<p><code>Image</code> implements <code>IDisposable</code>. Disposing calls Pillow's <code>close()</code> and releases the native <code>PyObject</code> handle.</p>
+<pre><code class="language-csharp">using var im = Image.Open("a.png");  // preferred
+</code></pre>
+<hr>
+<h2 id="imagefilter">ImageFilter</h2>
+<p>Predefined and parameterized filters for <code>Image.Filter()</code>:</p>
+<pre><code class="language-csharp">im.Filter(ImageFilter.Blur);
+im.Filter(ImageFilter.Sharpen);
+im.Filter(ImageFilter.GaussianBlur(radius: 4));
+im.Filter(ImageFilter.UnsharpMask(radius: 2, percent: 150, threshold: 3));
+im.Filter(ImageFilter.Median(size: 5));
+</code></pre>
+<p>Available: <code>Blur</code>, <code>Contour</code>, <code>Detail</code>, <code>EdgeEnhance</code>, <code>EdgeEnhanceMore</code>, <code>Emboss</code>, <code>FindEdges</code>, <code>Sharpen</code>, <code>Smooth</code>, <code>SmoothMore</code>, <code>GaussianBlur</code>, <code>BoxBlur</code>, <code>UnsharpMask</code>, <code>Min</code>, <code>Max</code>, <code>Median</code>, <code>Mode</code>.</p>
+<hr>
+<h2 id="imageops">ImageOps</h2>
+<p>Ready-made operations (each returns a new <code>Image</code>):</p>
+<pre><code class="language-csharp">ImageOps.Autocontrast(im, cutoff: 0);
+ImageOps.Equalize(im);
+ImageOps.Grayscale(im);
+ImageOps.Invert(im);
+ImageOps.Posterize(im, bits: 4);
+ImageOps.Solarize(im, threshold: 128);
+ImageOps.Flip(im);              // vertical
+ImageOps.Mirror(im);            // horizontal
+ImageOps.ExifTranspose(im);     // apply EXIF orientation
+ImageOps.Expand(im, border: 20, fill: 0);
+ImageOps.Colorize(im, black: 0, white: 255);
+ImageOps.Fit(im, (800, 600));   // letterbox to fit
+ImageOps.Pad(im, (800, 600), color: 0);
+ImageOps.Contain(im, (800, 600));
+ImageOps.Cover(im, (800, 600));
+</code></pre>
+<hr>
+<h2 id="imageenhance">ImageEnhance</h2>
+<p>Adjustment factors work like Pillow: <code>1.0</code> = original, <code>0.0</code> = minimum effect, <code>&gt;1.0</code> = stronger.</p>
+<pre><code class="language-csharp">// One-shot helpers
+ImageEnhance.Brightness(im, factor: 1.5);
+ImageEnhance.Contrast(im, factor: 1.2);
+ImageEnhance.Color(im, factor: 0.8);
+ImageEnhance.Sharpness(im, factor: 2.0);
+
+// Python-style enhancer objects (mirrors ImageEnhance.Brightness(im).enhance(1.5))
+var enhancer = new BrightnessEnhancer(im);
+using var brighter = enhancer.Enhance(1.5);
+</code></pre>
+<hr>
+<h2 id="imagechops">ImageChops</h2>
+<p>Per-pixel operations on pairs of images (sizes must match):</p>
+<pre><code class="language-csharp">ImageChops.Difference(a, b);
+ImageChops.Multiply(a, b);
+ImageChops.Add(a, b);
+ImageChops.Subtract(a, b);
+ImageChops.Blend(a, b, alpha: 0.5);
+ImageChops.Composite(a, b, mask);
+ImageChops.Lighter(a, b);
+ImageChops.Darker(a, b);
+ImageChops.Screen(a, b);
+ImageChops.Overlay(a, b);
+</code></pre>
+<hr>
+<h2 id="imagedraw">ImageDraw</h2>
+<p>Drawing modifies the target image <strong>in place</strong>:</p>
+<pre><code class="language-csharp">using var canvas = Image.New("RGB", (400, 200), color: 0xFFFFFF);
+using (var draw = new ImageDraw(canvas))
+{
+    draw.Rectangle((10, 10, 200, 100), outline: 0xFF0000, width: 2);
+    draw.Ellipse((50, 50, 150, 150), fill: 0x00FF00);
+    draw.Line((0, 0), (400, 200), fill: 0x0000FF, width: 3);
+    draw.Text((20, 160), "Hello", fill: 0x000000);
+}
+canvas.Save("drawing.png");
+</code></pre>
+<p>Optional TrueType font:</p>
+<pre><code class="language-csharp">draw.Text((10, 10), "Title", fill: 0x000000, fontPath: "fonts/MyFont.ttf", fontSize: 24);
+</code></pre>
+<hr>
+<h2 id="phase-2-completed">Phase 2 — completed</h2>
+<p>See <a href="features.html">Feature plan</a>.</p>
+<hr>
+<h2 id="imagefont-imagecolor">ImageFont &amp; ImageColor</h2>
+<pre><code class="language-csharp">var font = ImageFont.Truetype("fonts/MyFont.ttf", size: 24);
+var (l, t, r, b) = ImageFont.GetBBox(font, "Metrics");
+double width = ImageFont.GetLength(font, "Hello");
+
+var rgb = ImageColor.GetRgb("cornflowerblue"); // [100, 149, 237]
+long gray = ImageColor.GetColor("white", "L");
+</code></pre>
+<p>Use with <code>ImageDraw</code>:</p>
+<pre><code class="language-csharp">using var draw = new ImageDraw(canvas);
+draw.Text((10, 10), "Title", font, fill: 0x000000);
+</code></pre>
+<hr>
+<h2 id="exif-exiftags">Exif &amp; ExifTags</h2>
+<pre><code class="language-csharp">var exif = image.GetExif();
+if (exif.Contains(ExifTag.Orientation))
+{
+    var orientation = exif.Get(ExifTag.Orientation)!.As&lt;long&gt;();
+}
+
+exif.Set(ExifTag.Artist, "PillowNet");
+image.Save("tagged.jpg", exif: exif);
+
+foreach (var (tag, value) in exif.GetIfdItems(ExifIfd.GpsInfo))
+    Console.WriteLine($"GPS 0x{tag:X4}: {value}");
+</code></pre>
+<hr>
+<h2 id="imagesequence">ImageSequence</h2>
+<pre><code class="language-csharp">int n = ImageSequence.FrameCount(animated);
+IReadOnlyList&lt;Image&gt; frames = ImageSequence.AllFrames(animated);
+</code></pre>
+<hr>
+<h2 id="imagetransform">ImageTransform</h2>
+<pre><code class="language-csharp">// Scale to half size via affine matrix
+using var scaled = ImageTransform.Affine(
+    im, (im.Width / 2, im.Height / 2),
+    matrix: (0.5, 0, 0, 0, 0.5, 0));
+
+using var perspective = ImageTransform.Perspective(im, (400, 400),
+    matrix: (1, 0.1, 0, 0, 1, 0, 0.0001, 0.0001));
+</code></pre>
+<hr>
+<h2 id="imagemath">ImageMath</h2>
+<pre><code class="language-csharp">// Images must be single-band (L, I, or F) — convert RGB first if needed
+using var gray = imageA.Convert("L");
+using var brighter = ImageMath.Eval("a + 20", gray);
+using var blended = ImageMath.Eval("a + b", grayA, grayB);
+</code></pre>
+<p>Expressions use Pillow's <code>unsafe_eval</code> — only trusted input. RGB multi-band images are not supported directly; use <code>Convert("L")</code> or <code>Split()</code> first.</p>
+<hr>
+<h2 id="pixelaccess">PixelAccess</h2>
+<pre><code class="language-csharp">PixelAccess.Load(im);
+var pixel = im.GetPixel(0, 0);
+PixelAccess.PutPixel(im, 0, 0, 255);
+var (r, g, b) = PixelAccess.GetPixelRgb(im, 10, 10);
+</code></pre>
+<hr>
+<h2 id="imagecms">ImageCms</h2>
+<pre><code class="language-csharp">using var converted = ImageCms.ProfileToProfile(
+    im,
+    inputProfile: "sRGB.icc",
+    outputProfile: "AdobeRGB.icc",
+    renderingIntent: ImageCms.Intent.Perceptual);
+
+string desc = ImageCms.GetProfileDescription("sRGB.icc");
+</code></pre>
+<hr>
+<hr>
+<h2 id="watermark">Watermark</h2>
+<p>Add semi-transparent text or image overlays, or obscure a watermark in a known rectangular region.</p>
+<pre><code class="language-csharp">// Text watermark (default: bottom-right, 50% opacity)
+using var marked = Watermark.AddText(photo, "CONFIDENTIAL", new WatermarkOptions
+{
+    Opacity = 0.4,
+    Anchor = WatermarkAnchor.Center,
+    FontSize = 48,
+    Color = (255, 255, 255),
+    Angle = -30,
+});
+
+// Image logo watermark
+using var logo = Image.Open("logo.png");
+using var branded = Watermark.AddImage(photo, logo, new WatermarkOptions
+{
+    Opacity = 0.35,
+    Scale = 0.25,
+    Anchor = WatermarkAnchor.BottomRight,
+    Margin = 24,
+});
+
+// Remove/obscure watermark when you know its bounding box
+using var cleaned = Watermark.RemoveRegion(
+    photo,
+    box: (10, 10, 220, 90),
+    method: WatermarkRemovalMethod.Blur,
+    blurRadius: 16);
+</code></pre>
+<p>Removal methods:</p>
+<table class="table">
+<thead>
+<tr>
+<th>Method</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Blur</code></td>
+<td>Gaussian blur over the region (default)</td>
+</tr>
+<tr>
+<td><code>Median</code></td>
+<td>Median filter — good for small text overlays</td>
+</tr>
+<tr>
+<td><code>Fill</code></td>
+<td>Fill with the mean color of the region</td>
+</tr>
+</tbody>
+</table>
+<p>Pillow does not perform AI inpainting; removal works best when you can specify the watermark's location.</p>
+<hr>
+<h2 id="imagestat">ImageStat</h2>
+<pre><code class="language-csharp">var mean = ImageStat.Mean(im);       // per-channel means
+var extrema = ImageStat.Extrema(im); // per-channel (min, max)
+var count = ImageStat.Count(im);     // pixel count
+</code></pre>
+<hr>
+<h2 id="complete-example">Complete example</h2>
+<pre><code class="language-csharp">using PillowNet;
+
+PillowEnvironment.Initialize();
+
+using var photo = Image.Open("portrait.jpg");
+
+// EXIF auto-rotate, fit to box, adjust tone
+using var oriented = ImageOps.ExifTranspose(photo);
+using var fitted = ImageOps.Fit(oriented, (1200, 800));
+using var adjusted = ImageEnhance.Contrast(
+    ImageEnhance.Brightness(fitted, 1.1), 1.15);
+using var final = adjusted.Filter(ImageFilter.UnsharpMask(radius: 1.5));
+
+final.Save("portrait_edited.jpg", format: "JPEG");
+</code></pre>
+<hr>
+<h2 id="internal-architecture">Internal architecture</h2>
+<h3 id="layer-diagram">Layer diagram</h3>
+<pre><code>┌──────────────────────────────────────────────────────────────┐
+│  Your app / PillowNet.Cli                                    │
+└────────────────────────────┬─────────────────────────────────┘
+                             │
+┌────────────────────────────▼─────────────────────────────────┐
+│  C# façade (Image, ImageFilter, ImageOps, …)                 │
+│  • PascalCase API matching Pillow semantics                  │
+│  • IDisposable lifetime for PyObject handles                 │
+└────────────┬───────────────────────────────┬─────────────────┘
+             │                               │
+   CSnakes   │  IPillowBridge               │  PyObject.GetAttr / Call
+   generated │  (typed bridge functions)    │  (direct Pillow methods)
+             │                               │
+┌────────────▼───────────────────────────────▼─────────────────┐
+│  pillow_bridge.py  +  embedded Pillow (CPython heap)         │
+└──────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="two-interop-strategies">Two interop strategies</h3>
+<p>PillowNet uses <strong>both</strong> patterns CSnakes supports:</p>
+<h4 id="generated-bridge-functions-pillow_bridge.py">1. Generated bridge functions (<code>pillow_bridge.py</code>)</h4>
+<p>Typed top-level Python functions are parsed at compile time. CSnakes emits <code>IPillowBridge</code> with strongly typed C# methods.</p>
+<pre><code class="language-python">def image_open(fp: str) -&gt; Any:
+return Image.open(fp)
+</code></pre>
+<pre><code class="language-csharp">// Generated on IPythonEnvironment:
+IPillowBridge bridge = env.PillowBridge();
+PyObject handle = bridge.ImageOpen("photo.jpg");
+</code></pre>
+<p>Use the bridge for:</p>
+<ul>
+<li>Module-level factories (<code>Image.open</code>, <code>Image.new</code>)</li>
+<li>Filter singletons (<code>ImageFilter.BLUR</code>)</li>
+<li><code>ImageOps</code> / <code>ImageChops</code> / <code>ImageEnhance</code> helpers</li>
+<li>Anything that benefits from compile-time type checking on primitives (<code>str</code>, <code>int</code>, <code>float</code>, <code>tuple</code>, <code>bytes</code>)</li>
+</ul>
+<p><code>typing.Any</code> on parameters or returns tells CSnakes to pass <strong><code>PyObject</code></strong> handles without copying image pixels across the boundary.</p>
+<h4 id="direct-pyobject-method-calls-image-instance-methods">2. Direct <code>PyObject</code> method calls (<code>Image</code> instance methods)</h4>
+<p>For methods on Pillow's <code>Image</code> class, the C# wrapper holds a <code>PyObject</code> and invokes Python dynamically:</p>
+<pre><code class="language-csharp">var result = Handle.GetAttr("resize").Call(
+    PyObject.From((width, height)),
+    PyObject.From((long)resample));
+return new Image(result);
+</code></pre>
+<p>This avoids writing a bridge function for every Pillow method while keeping the C# surface identical to Python (<code>Resize</code>, <code>Save</code>, <code>Paste</code>, …).</p>
+<h3 id="object-lifetime">Object lifetime</h3>
+<table class="table">
+<thead>
+<tr>
+<th>Object</th>
+<th>Owned by</th>
+<th>Disposal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Image</code></td>
+<td>C# wrapper</td>
+<td><code>Dispose()</code> → <code>image.close()</code> + <code>PyObject.Dispose()</code></td>
+</tr>
+<tr>
+<td><code>IImageFilter</code></td>
+<td>Static/singleton or per-call</td>
+<td>Bridge filters are lightweight handles; factory filters allocate new PyObjects</td>
+</tr>
+<tr>
+<td>Return values from transforms</td>
+<td>Caller</td>
+<td>Wrap in <code>using</code> — each transform returns a <strong>new</strong> image</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rules:</strong></p>
+<ol>
+<li>Never use an <code>Image</code> after <code>Dispose()</code>.</li>
+<li>Transforms return new instances; the source image is unchanged (except <code>Thumbnail</code>, <code>Paste</code>, <code>AlphaComposite</code>, and <code>ImageDraw</code>).</li>
+<li>Do not share one <code>Image</code> across threads without external synchronization (Python GIL is managed by CSnakes per call).</li>
+</ol>
+<h3 id="runtime-bootstrap-pillowenvironment">Runtime bootstrap (<code>PillowEnvironment</code>)</h3>
+<pre><code class="language-csharp">builder.Services
+.WithPython()
+.WithHome(AppContext.BaseDirectory)      // pillow_bridge.py lives here
+.WithVirtualEnvironment(".venv")
+.WithPipInstaller("requirements.txt")
+.FromRedistributable();                  // auto-download CPython
+</code></pre>
+<p><code>IPillowBridge</code> is resolved once and cached. Initialization is idempotent.</p>
+<h3 id="type-mapping">Type mapping</h3>
+<table class="table">
+<thead>
+<tr>
+<th>Python (annotations)</th>
+<th>C#</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>str</code></td>
+<td><code>string</code></td>
+</tr>
+<tr>
+<td><code>int</code></td>
+<td><code>long</code></td>
+</tr>
+<tr>
+<td><code>float</code></td>
+<td><code>double</code></td>
+</tr>
+<tr>
+<td><code>bool</code></td>
+<td><code>bool</code></td>
+</tr>
+<tr>
+<td><code>bytes</code></td>
+<td><code>byte[]</code></td>
+</tr>
+<tr>
+<td><code>tuple[int, int]</code></td>
+<td><code>(long, long)</code> or <code>(int, int)</code></td>
+</tr>
+<tr>
+<td><code>Any</code> / Pillow objects</td>
+<td><code>PyObject</code></td>
+</tr>
+<tr>
+<td><code>None</code> optional</td>
+<td><code>T?</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="error-handling">Error handling</h3>
+<p>Python exceptions become <code>CSnakes.Runtime.PythonInvocationException</code> with the original message in <code>InnerException</code>. Typical cases: unsupported mode, size mismatch for <code>ImageChops</code>, corrupt files.</p>
+<hr>
+<h2 id="feature-roadmap">Feature roadmap</h2>
+<p>See <a href="features.html">Feature plan</a> for the full Pillow coverage plan and what was added in each phase.</p>
+<h3 id="currently-wrapped">Currently wrapped</h3>
+<ul>
+<li><strong>Image</strong>: open, new, frombytes, save (with EXIF), resize, thumbnail, convert, filter, rotate, crop, copy, transpose, paste, alpha composite, split, merge, getexif, getpixel, putpixel, load</li>
+<li><strong>ImageFilter</strong>: all predefined + parameterized filters</li>
+<li><strong>ImageOps</strong>: full Phase 2 set</li>
+<li><strong>ImageEnhance</strong>, <strong>ImageChops</strong>, <strong>ImageDraw</strong>, <strong>ImageStat</strong></li>
+<li><strong>ImageFont</strong>, <strong>ImageColor</strong>, <strong>Exif</strong> / <strong>ExifTags</strong></li>
+<li><strong>ImageSequence</strong>, <strong>ImageTransform</strong>, <strong>ImageMath</strong>, <strong>PixelAccess</strong>, <strong>ImageCms</strong>, <strong>Watermark</strong></li>
+</ul>
+<h3 id="planned-phase-4">Planned (Phase 4)</h3>
+<table class="table">
+<thead>
+<tr>
+<th>Module</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ImageMorph</code></td>
+<td>Morphological ops</td>
+</tr>
+<tr>
+<td><code>ImageQt</code> / <code>ImageTk</code></td>
+<td>Out of scope (GUI)</td>
+</tr>
+<tr>
+<td><code>ImageGrab</code></td>
+<td>Out of scope (screen capture)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="cli-quick-reference">CLI quick reference</h2>
+<pre><code class="language-bash">dotnet run --project PillowNet.Cli -- info IMAGE
+dotnet run --project PillowNet.Cli -- convert IN OUT [--format FMT] [--mode MODE]
+dotnet run --project PillowNet.Cli -- resize IN OUT -w W -h H [--resample Lanczos]
+dotnet run --project PillowNet.Cli -- thumbnail IN OUT [--max-size 128]
+dotnet run --project PillowNet.Cli -- filter IN OUT -f GaussianBlur [--radius 3]
+dotnet run --project PillowNet.Cli -- enhance IN OUT -o Grayscale
+dotnet run --project PillowNet.Cli -- adjust IN OUT --brightness 1.2 --contrast 1.1
+dotnet run --project PillowNet.Cli -- flip IN OUT [--horizontal]
+dotnet run --project PillowNet.Cli -- composite BASE OVERLAY OUT [--alpha 0.5]
+dotnet run --project PillowNet.Cli -- draw IN OUT --text "Hello" --x 10 --y 10
+dotnet run --project PillowNet.Cli -- exif IMAGE
+dotnet run --project PillowNet.Cli -- frames ANIMATED_GIF ./frames/
+dotnet run --project PillowNet.Cli -- math A.PNG OUT.PNG -e "a * 1.5"
+dotnet run --project PillowNet.Cli -- pixel IMAGE --x 0 --y 0
+dotnet run --project PillowNet.Cli -- pixel IMAGE --x 0 --y 0 --set 255 -o out.png
+dotnet run --project PillowNet.Cli -- watermark-text IN OUT -t "Copyright" --opacity 0.4
+dotnet run --project PillowNet.Cli -- watermark-image IN LOGO.PNG OUT --opacity 0.3 --anchor BottomRight
+dotnet run --project PillowNet.Cli -- watermark-remove IN OUT -l 10 -t 10 -r 200 -b 80 --method Blur
+</code></pre>
+</div>
+          <footer class="doc-footer">
+            <p>PillowNet · MIT License · <a href="https://github.com/hoihky/pillownet">GitHub</a> · Generated with <a href="https://github.com/hoihky/MDWeb">MDWeb</a></p>
+          </footer>
+        </article>
+
+        
+                <aside class="toc" aria-label="On this page">
+                  <p class="toc-title">On this page</p>
+                  <ul>
+                    
+                        <li class="toc-h2">
+                          <a href="#getting-started">Getting started</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#api-overview">API overview</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#naming-conventions">Naming conventions</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#image">Image</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#factory-methods">Factory methods</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#properties">Properties</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#transform-methods-return-new">Transform methods (return new )</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#in-place-methods">In-place methods</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#io">I/O</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#disposal">Disposal</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagefilter">ImageFilter</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imageops">ImageOps</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imageenhance">ImageEnhance</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagechops">ImageChops</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagedraw">ImageDraw</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#phase-2-completed">Phase 2 — completed</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagefont-imagecolor">ImageFont & ImageColor</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#exif-exiftags">Exif & ExifTags</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagesequence">ImageSequence</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagetransform">ImageTransform</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagemath">ImageMath</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#pixelaccess">PixelAccess</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagecms">ImageCms</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#watermark">Watermark</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#imagestat">ImageStat</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#complete-example">Complete example</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#internal-architecture">Internal architecture</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#layer-diagram">Layer diagram</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#two-interop-strategies">Two interop strategies</a>
+                        </li>
+                        
+                        <li class="toc-h4">
+                          <a href="#1-generated-bridge-functions">1. Generated bridge functions ()</a>
+                        </li>
+                        
+                        <li class="toc-h4">
+                          <a href="#2-direct-method-calls-instance-methods">2. Direct  method calls ( instance methods)</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#object-lifetime">Object lifetime</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#runtime-bootstrap">Runtime bootstrap ()</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#type-mapping">Type mapping</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#error-handling">Error handling</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#feature-roadmap">Feature roadmap</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#currently-wrapped">Currently wrapped</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#planned-phase-4">Planned (Phase 4)</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#cli-quick-reference">CLI quick reference</a>
+                        </li>
+                        
+                  </ul>
+                </aside>
+                
+      </main>
+    </div>
+  </div>
+  <script src="assets/vendor/mermaid.min.js"></script>
+  <script src="assets/vendor/highlight.min.js"></script>
+  <script src="assets/js/site.js"></script>
+</body>
+</html>

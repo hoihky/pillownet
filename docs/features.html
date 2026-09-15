@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feature Plan · PillowNet</title>
+  <meta name="description" content="C# wrapper for Pillow via CSnakes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="stylesheet" href="assets/vendor/atom-one-dark.min.css">
+</head>
+<body>
+  <div class="site">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">☰</button>
+      <a href="index.html" class="brand">PillowNet</a>
+      <nav class="topbar-nav" aria-label="Primary">
+        <a href="index.html">Overview</a>
+        <a href="https://github.com/hoihky/pillownet" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="search-wrap">
+        <input type="search" id="search" placeholder="Search docs…" autocomplete="off">
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <nav class="nav" aria-label="Documentation">
+          <ul class="nav-list">
+            <li class="nav-item depth-0">
+              <a href="index.html" class="nav-link">Overview</a>
+            </li>
+            
+                        <li class="nav-item depth-0">
+                          
+                            <a href="api.html" class="nav-link">API Reference</a>
+                            
+                        </li>
+                        
+                        <li class="nav-item depth-0 is-active">
+                          
+                            <a href="features.html" class="nav-link">Feature Plan</a>
+                            
+                        </li>
+                        
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <article class="doc">
+          <header class="doc-header">
+            <h1>Feature Plan</h1>
+          </header>
+          <div class="doc-body"><p>This document tracks Pillow module coverage, implementation phases, and research notes.</p>
+<h2 id="pillow-module-inventory">Pillow module inventory</h2>
+<table class="table">
+<thead>
+<tr>
+<th>Python module</th>
+<th>Purpose</th>
+<th>PillowNet status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PIL.Image</code></td>
+<td>Core image type</td>
+<td><strong>Wrapped</strong> (core + Phase 4 extensions)</td>
+</tr>
+<tr>
+<td><code>PIL.ImageFilter</code></td>
+<td>Convolution filters</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ImageOps</code></td>
+<td>Common transforms</td>
+<td><strong>Wrapped</strong> (extended set)</td>
+</tr>
+<tr>
+<td><code>PIL.ImageEnhance</code></td>
+<td>Tone adjustments</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ImageChops</code></td>
+<td>Channel math</td>
+<td><strong>Wrapped</strong> (common ops)</td>
+</tr>
+<tr>
+<td><code>PIL.ImageDraw</code></td>
+<td>Vector drawing</td>
+<td><strong>Wrapped</strong> (shapes + polygon)</td>
+</tr>
+<tr>
+<td><code>PIL.ImageStat</code></td>
+<td>Statistics</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ImageFont</code></td>
+<td>Font objects</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ImageColor</code></td>
+<td>Color parsing</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ImageCms</code></td>
+<td>ICC / color management</td>
+<td><strong>Wrapped</strong> (basic)</td>
+</tr>
+<tr>
+<td><code>PIL.ImageMath</code></td>
+<td>Pixel expressions</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ImageMorph</code></td>
+<td>Morphology</td>
+<td><strong>Wrapped</strong> (named operators)</td>
+</tr>
+<tr>
+<td><code>PIL.ImageSequence</code></td>
+<td>Animation frames</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ExifTags</code></td>
+<td>EXIF constants</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ImageTransform</code></td>
+<td>Affine / perspective</td>
+<td><strong>Wrapped</strong></td>
+</tr>
+<tr>
+<td><code>PIL.ImageQt</code> / <code>ImageTk</code></td>
+<td>GUI</td>
+<td>Out of scope</td>
+</tr>
+<tr>
+<td><code>PIL.ImageGrab</code></td>
+<td>Screen capture</td>
+<td>Out of scope</td>
+</tr>
+<tr>
+<td><code>PIL.ImageWin</code></td>
+<td>Windows DIB</td>
+<td>Out of scope</td>
+</tr>
+<tr>
+<td><code>PIL.PdfImagePlugin</code> etc.</td>
+<td>Format plugins</td>
+<td>Via <code>Image.Open</code> / <code>Save</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="phase-13-completed">Phase 1–3 (completed)</h2>
+<p>See git history and <a href="api.html">API reference</a> for the initial through watermark releases.</p>
+<h2 id="phase-4-in-progress">Phase 4 (in progress)</h2>
+<h3 id="implemented">Implemented</h3>
+<p><strong>Image</strong></p>
+<ul>
+<li><code>GetBBox</code>, <code>ToBytes</code>, <code>GetBands</code>, <code>GetChannel</code>, <code>Quantize</code>, <code>Seek</code>, <code>Tell</code></li>
+<li><code>New</code> with RGB tuple / object color (fixes int-only limitation)</li>
+</ul>
+<p><strong>ImageDraw</strong></p>
+<ul>
+<li><code>Polygon</code></li>
+</ul>
+<p><strong>ImageMorph</strong></p>
+<ul>
+<li><code>Apply</code>, <code>Match</code> with built-in operator names (<code>erosion4</code>, <code>dilation8</code>, <code>edge</code>, …)</li>
+</ul>
+<p><strong>Exif</strong></p>
+<ul>
+<li><code>GetIfdStrings</code> (managed read without leaking <code>PyObject</code>)</li>
+</ul>
+<p><strong>Bug fixes</strong></p>
+<ul>
+<li><code>ImageColor.GetRgb</code> / <code>GetColor</code> dispose bridge handles</li>
+<li>CLI <code>enhance --op Posterize</code> validates bits 1–8</li>
+</ul>
+<h3 id="planned-next-high-value">Planned next (high value)</h3>
+<table class="table">
+<thead>
+<tr>
+<th>Feature</th>
+<th>Pillow API</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Save options</td>
+<td><code>Image.save(..., quality=, optimize=)</code></td>
+<td>JPEG/WebP output control</td>
+</tr>
+<tr>
+<td>Point transform</td>
+<td><code>Image.point()</code></td>
+<td>Thresholding, curves</td>
+</tr>
+<tr>
+<td>Histogram</td>
+<td><code>Image.histogram()</code></td>
+<td>Analysis, auto-levels</td>
+</tr>
+<tr>
+<td>Palette mode</td>
+<td><code>getpalette</code> / <code>putpalette</code></td>
+<td>GIF/PNG-P workflows</td>
+</tr>
+<tr>
+<td>Bulk pixels</td>
+<td><code>getdata</code> / <code>putdata</code></td>
+<td>Fast buffer I/O</td>
+</tr>
+<tr>
+<td>Draw extras</td>
+<td><code>arc</code>, <code>chord</code>, <code>pieslice</code>, <code>multiline_text</code></td>
+<td>Rich annotations</td>
+</tr>
+<tr>
+<td>ImageChops extras</td>
+<td><code>constant</code>, <code>offset</code>, <code>logical</code> ops</td>
+<td>Compositing</td>
+</tr>
+<tr>
+<td>ImageOps extras</td>
+<td><code>scale</code>, <code>deform</code></td>
+<td>Thumbnails, warping</td>
+</tr>
+<tr>
+<td>ImageMorph LUT</td>
+<td><code>LutBuilder</code>, custom patterns</td>
+<td>Custom morphology</td>
+</tr>
+<tr>
+<td>EXIF GPS</td>
+<td><code>ExifTags</code> GPS enum coverage</td>
+<td>Location metadata</td>
+</tr>
+<tr>
+<td>Features probe</td>
+<td><code>PIL.features.check</code></td>
+<td>Runtime capability checks</td>
+</tr>
+</tbody>
+</table>
+<h3 id="lower-priority-out-of-scope">Lower priority / out of scope</h3>
+<ul>
+<li><code>ImageGrab</code>, <code>ImageQt</code>, <code>ImageTk</code> (platform/GUI specific)</li>
+<li>NumPy <code>fromarray</code> / <code>Image.fromarray</code> (add when buffer API exists)</li>
+<li><code>Image.show()</code> (requires GUI viewer)</li>
+</ul>
+<h2 id="research-notes-pillow-12.x">Research notes (Pillow 12.x)</h2>
+<h3 id="most-requested-image-methods-not-yet-wrapped">Most-requested Image methods not yet wrapped</h3>
+<ol>
+<li><strong><code>point(lut, mode)</code></strong> — per-pixel lookup; essential for thresholding and tone curves.</li>
+<li><strong><code>histogram()</code></strong> — returns 256×bands values; useful with <code>ImageStat</code> extensions.</li>
+<li><strong><code>save</code> keyword args</strong> — <code>quality</code>, <code>subsampling</code>, <code>lossless</code>, <code>duration</code> (GIF), <code>append_images</code>.</li>
+<li><strong><code>getdata</code> / <code>putdata</code></strong> — iterator over flattened pixels; fastest path for bulk edits.</li>
+<li><strong><code>reduce(factor)</code></strong> — fast downscale by integer factor.</li>
+<li><strong><code>getpalette</code> / <code>putpalette</code></strong> — palette manipulation for <code>P</code> mode.</li>
+<li><strong><code>transform</code> generic</strong> — already partially covered by <code>ImageTransform</code>; generic <code>Image.transform</code> still missing.</li>
+<li><strong><code>alpha_composite</code> / <code>paste</code> mask</strong> — <code>paste</code> supports mask kwarg; not exposed yet.</li>
+</ol>
+<h3 id="imagedraw-gaps">ImageDraw gaps</h3>
+<ul>
+<li><code>multiline_text</code>, <code>textbbox</code>, <code>textlength</code> on draw context</li>
+<li><code>arc</code>, <code>chord</code>, <code>pieslice</code>, <code>regular_polygon</code></li>
+</ul>
+<h3 id="imagefilter-gaps">ImageFilter gaps</h3>
+<ul>
+<li>Custom <code>Kernel</code> / <code>RankFilter</code> construction</li>
+<li><code>ADD</code>, <code>SUBTRACT</code> etc. module-level constants (less common)</li>
+</ul>
+<h3 id="imagemorph-gaps">ImageMorph gaps</h3>
+<ul>
+<li><code>LutBuilder</code> for custom patterns</li>
+<li><code>load_lut</code> / <code>save_lut</code> file I/O</li>
+</ul>
+<h3 id="animation-gaps">Animation gaps</h3>
+<ul>
+<li><code>ImageSequence.Iterator</code> lazy iteration (currently <code>AllFrames</code> copies all)</li>
+<li><code>save_all</code> / <code>append_images</code> for building GIFs from frames</li>
+</ul>
+<h2 id="design-principles">Design principles</h2>
+<ol>
+<li><strong>Mirror Pillow semantics</strong> — same defaults, same in-place vs copy behavior.</li>
+<li><strong>C# conventions</strong> — PascalCase types/methods, <code>IDisposable</code> for images and transient handles.</li>
+<li><strong>Bridge vs PyObject</strong> — factories in <code>pillow_bridge.py</code>; instance methods on <code>Image</code> via <code>PyObject</code>.</li>
+<li><strong>Minimal scope</strong> — wrap what Pillow provides; don't reimplement algorithms in C#.</li>
+<li><strong>No handle leaks</strong> — dispose <code>PyObject</code> temporaries; prefer managed return types where practical.</li>
+</ol>
+</div>
+          <footer class="doc-footer">
+            <p>PillowNet · MIT License · <a href="https://github.com/hoihky/pillownet">GitHub</a> · Generated with <a href="https://github.com/hoihky/MDWeb">MDWeb</a></p>
+          </footer>
+        </article>
+
+        
+                <aside class="toc" aria-label="On this page">
+                  <p class="toc-title">On this page</p>
+                  <ul>
+                    
+                        <li class="toc-h2">
+                          <a href="#pillow-module-inventory">Pillow module inventory</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#phase-13-completed">Phase 1–3 (completed)</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#phase-4-in-progress">Phase 4 (in progress)</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#implemented">Implemented</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#planned-next-high-value">Planned next (high value)</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#lower-priority-out-of-scope">Lower priority / out of scope</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#research-notes-pillow-12x">Research notes (Pillow 12.x)</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#most-requested-image-methods-not-yet-wrapped">Most-requested Image methods not yet wrapped</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#imagedraw-gaps">ImageDraw gaps</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#imagefilter-gaps">ImageFilter gaps</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#imagemorph-gaps">ImageMorph gaps</a>
+                        </li>
+                        
+                        <li class="toc-h3">
+                          <a href="#animation-gaps">Animation gaps</a>
+                        </li>
+                        
+                        <li class="toc-h2">
+                          <a href="#design-principles">Design principles</a>
+                        </li>
+                        
+                  </ul>
+                </aside>
+                
+      </main>
+    </div>
+  </div>
+  <script src="assets/vendor/mermaid.min.js"></script>
+  <script src="assets/vendor/highlight.min.js"></script>
+  <script src="assets/js/site.js"></script>
+</body>
+</html>

@@ -1,4 +1,7 @@
-# PillowNet Feature Plan
+---
+title: Feature Plan
+order: 20
+---
 
 This document tracks Pillow module coverage, implementation phases, and research notes.
 
@@ -28,7 +31,7 @@ This document tracks Pillow module coverage, implementation phases, and research
 
 ## Phase 1–3 (completed)
 
-See git history and [API.md](API.md) for the initial through watermark releases.
+See git history and [API reference](api.md) for the initial through watermark releases.
 
 ## Phase 4 (in progress)
 

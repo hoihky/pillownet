@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PillowNet — C# Wrapper for Pillow via CSnakes</title>
+  <meta name="description" content="PillowNet embeds Python Pillow in .NET using CSnakes. A C# API and CLI for image processing, filters, EXIF, watermarks, and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/portfolio.css">
+</head>
+<body>
+  <div class="site">
+    <header class="topbar">
+      <a class="brand" href="index.html">PillowNet</a>
+      <nav class="topbar-nav" aria-label="Primary">
+        <a href="#overview">Overview</a>
+        <a href="features.html">Roadmap</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#quick-start">Quick start</a>
+        <a href="api.html">API</a>
+        <a href="features.html">Features</a>
+        <a href="https://github.com/hoihky/pillownet" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="portfolio-layout">
+      <main class="portfolio-main doc-body">
+        <section class="hero" id="top">
+          <div class="hero-mark" aria-hidden="true">PN</div>
+          <div class="hero-text">
+            <h1>PillowNet</h1>
+            <p class="hero-tagline">
+              A C# wrapper for <a href="https://python-pillow.org/" target="_blank" rel="noopener">Pillow</a> (PIL)
+              using <a href="https://tonybaloney.github.io/CSnakes/" target="_blank" rel="noopener">CSnakes</a>
+              to embed Python in .NET. The API mirrors Pillow's Python design with C# naming conventions.
+            </p>
+            <div class="hero-links">
+              <a href="#quick-start">Get started</a>
+              <a href="api.html">API reference</a>
+              <a href="features.html">Feature roadmap</a>
+              <a href="https://github.com/hoihky/pillownet" target="_blank" rel="noopener">View on GitHub</a>
+            </div>
+          </div>
+        </section>
+
+        <aside class="disclaimer" role="note">
+          <strong>Experimental prototype.</strong>
+          This project is a work-in-progress built with the help of "vibe coding".
+          Things will break, features are missing, and it may not be stable enough for production use.
+        </aside>
+
+        <section id="overview">
+          <h2 class="section-title">Overview</h2>
+          <p class="section-lead">
+            PillowNet brings Pillow's image-processing power to .NET applications without spawning external Python processes.
+            Call familiar operations from C# or use the bundled CLI for common tasks.
+          </p>
+
+          <div class="career-grid">
+            <article class="career-card">
+              <h3>PillowNet.Core</h3>
+              <p>
+                Typed C# API — <code>Image</code>, <code>ImageFilter</code>, <code>ImageDraw</code>,
+                <code>Exif</code>, <code>Watermark</code>, and more — backed by an embedded Pillow runtime.
+              </p>
+            </article>
+            <article class="career-card">
+              <h3>PillowNet.Cli</h3>
+              <p>
+                Command-line tool for convert, resize, filter, enhance, watermark, EXIF inspection,
+                and other everyday image workflows.
+              </p>
+            </article>
+            <article class="career-card">
+              <h3>PillowNet.Tests</h3>
+              <p>
+                Automated regression tests run on every test project build (29 tests) to catch
+                lifecycle bugs and API regressions early.
+              </p>
+            </article>
+          </div>
+
+          <ul class="skill-list" aria-label="Technologies">
+            <li>.NET 10</li>
+            <li>C#</li>
+            <li>CSnakes</li>
+            <li>Python 3</li>
+            <li>Pillow</li>
+            <li>xUnit</li>
+          </ul>
+        </section>
+
+        <section id="features">
+          <h2 class="section-title">Features</h2>
+          <p class="section-lead">
+            Core Pillow modules are wrapped with IDisposable-aware C# types and a thin Python bridge.
+          </p>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>Image I/O &amp; geometry</h3>
+              <p>Open, save, resize, crop, rotate, flip, merge bands, quantize, and pixel-level access.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Filters &amp; enhancements</h3>
+              <p>Blur, sharpen, edge detection, Gaussian blur, and ImageEnhance brightness/contrast/sharpness.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Drawing &amp; color</h3>
+              <p>ImageDraw primitives, fonts, polygons, and ImageColor helpers for RGB and named colors.</p>
+            </article>
+            <article class="feature-card">
+              <h3>ImageOps &amp; morph</h3>
+              <p>Grayscale, posterize, autocontrast, and ImageMorph apply/match operators.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Watermarks</h3>
+              <p>Text and image watermarks with opacity, anchoring, and region removal.</p>
+            </article>
+            <article class="feature-card">
+              <h3>EXIF &amp; metadata</h3>
+              <p>Read and preserve EXIF tags, IFD strings, and typed tag accessors on save.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Sequence &amp; math</h3>
+              <p>Multi-frame images (GIF/WebP) and ImageMath expression evaluation.</p>
+            </article>
+            <article class="feature-card">
+              <h3>CLI tooling</h3>
+              <p>Batch-friendly commands for info, convert, resize, filter, enhance, and watermark workflows.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="architecture">
+          <h2 class="section-title">Architecture</h2>
+          <p class="section-lead">
+            C# calls into a Python module via CSnakes; Pillow does the heavy lifting under the hood.
+          </p>
+
+          <div class="arch-stack" role="img" aria-label="PillowNet architecture layers">
+            <div class="arch-layer">
+              <strong>PillowNet.Cli / your app</strong>
+              <span>System.CommandLine or direct C# API usage</span>
+            </div>
+            <div class="arch-arrow" aria-hidden="true">↓</div>
+            <div class="arch-layer">
+              <strong>PillowNet.Core</strong>
+              <span>Image, ImageFilter, ImageDraw, Exif, Watermark, …</span>
+            </div>
+            <div class="arch-arrow" aria-hidden="true">↓</div>
+            <div class="arch-layer">
+              <strong>CSnakes runtime</strong>
+              <span>Embeds CPython; manages PyObject lifetimes from C#</span>
+            </div>
+            <div class="arch-arrow" aria-hidden="true">↓</div>
+            <div class="arch-layer">
+              <strong>pillow_bridge.py</strong>
+              <span>Typed Python functions that call Pillow APIs</span>
+            </div>
+            <div class="arch-arrow" aria-hidden="true">↓</div>
+            <div class="arch-layer">
+              <strong>Pillow (PIL)</strong>
+              <span>Decode, transform, encode images</span>
+            </div>
+          </div>
+
+          <h3 class="subsection-title">Solution layout</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>PillowNet.Core</code></td>
+                <td>C# wrappers + <code>pillow_bridge.py</code> + CSnakes bootstrap</td>
+              </tr>
+              <tr>
+                <td><code>PillowNet.Cli</code></td>
+                <td>CLI entry point referencing Core</td>
+              </tr>
+              <tr>
+                <td><code>PillowNet.Tests</code></td>
+                <td>xUnit regression suite with shared <code>PillowFixture</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="how-it-works">
+          <h2 class="section-title">How it works</h2>
+          <ol class="pipeline-list">
+            <li>
+              <strong>Initialize once</strong>
+              <span><code>PillowEnvironment.Initialize()</code> boots CSnakes and loads Pillow via pip on first run.</span>
+            </li>
+            <li>
+              <strong>Open an image</strong>
+              <span><code>Image.Open(path)</code> returns a disposable handle to a Pillow <code>Image</code> object.</span>
+            </li>
+            <li>
+              <strong>Transform</strong>
+              <span>Resize, filter, draw, or enhance — each operation crosses the bridge and returns new wrappers.</span>
+            </li>
+            <li>
+              <strong>Save or inspect</strong>
+              <span>Write output files, read EXIF, or query pixels; dispose wrappers when done.</span>
+            </li>
+          </ol>
+        </section>
+
+        <section id="quick-start">
+          <h2 class="section-title">Quick start</h2>
+
+          <h3 class="subsection-title">Prerequisites</h3>
+          <ul>
+            <li>.NET 10 SDK</li>
+            <li>Network access on first run (CSnakes downloads Python and installs Pillow)</li>
+          </ul>
+
+          <h3 class="subsection-title">Build &amp; test</h3>
+          <pre><code>dotnet build
+dotnet test</code></pre>
+          <p>
+            Building <code>PillowNet.Tests</code> also runs the test suite automatically.
+            Disable with <code>-p:RunTestsAfterBuild=false</code> if needed.
+          </p>
+
+          <h3 class="subsection-title">C# API</h3>
+          <pre><code>using PillowNet;
+
+PillowEnvironment.Initialize();
+
+using var image = Image.Open("input.jpg");
+using var resized = image.Resize((800, 600), Resampling.Lanczos);
+using var filtered = resized.Filter(ImageFilter.Sharpen);
+filtered.Save("output.jpg");</code></pre>
+
+          <h3 class="subsection-title">CLI examples</h3>
+          <pre><code># Image metadata
+dotnet run --project PillowNet.Cli -- info photo.jpg
+
+# Convert format / color mode
+dotnet run --project PillowNet.Cli -- convert input.png output.jpg --format JPEG
+
+# Resize and filter
+dotnet run --project PillowNet.Cli -- resize input.jpg out.jpg -w 800 -h 600 --resample Lanczos
+dotnet run --project PillowNet.Cli -- filter input.jpg blurred.jpg --filter GaussianBlur --radius 4
+
+# Watermark
+dotnet run --project PillowNet.Cli -- watermark-text input.jpg out.jpg -t "Copyright" --opacity 0.4</code></pre>
+
+          <ul class="demo-list">
+            <li><code>info</code> — print dimensions, mode, format</li>
+            <li><code>convert</code> — change format or color mode</li>
+            <li><code>resize</code> / <code>thumbnail</code> — geometry</li>
+            <li><code>filter</code> — Pillow ImageFilter presets</li>
+            <li><code>enhance</code> — ImageOps / ImageEnhance</li>
+            <li><code>draw</code> — rectangles, text, polygons</li>
+            <li><code>exif</code> — read metadata tags</li>
+            <li><code>watermark-text</code> / <code>watermark-image</code> / <code>watermark-remove</code></li>
+            <li><code>pixel</code> — get or set individual pixels</li>
+            <li><code>sequence</code> — multi-frame GIF/WebP frames</li>
+          </ul>
+        </section>
+
+        <section id="docs">
+          <h2 class="section-title">Documentation</h2>
+          <div class="cta-card">
+            <h3>Go deeper</h3>
+            <p>
+              The markdown references cover bridge internals, disposal rules, CLI flags, and the Phase 4 feature roadmap.
+            </p>
+            <p>
+              <a href="api.html">API Reference &amp; internals →</a><br>
+              <a href="features.html">Feature roadmap →</a><br>
+              <a href="https://github.com/hoihky/pillownet" target="_blank" rel="noopener">Source on GitHub →</a>
+            </p>
+          </div>
+        </section>
+
+        <footer class="site-footer">
+          <p>
+            PillowNet · MIT License ·
+            <a href="https://github.com/hoihky" target="_blank" rel="noopener">hoihky</a>
+            · Part of the MDWeb / SkyUI / Spark ecosystem
+          </p>
+        </footer>
+      </main>
+
+      <nav class="toc" aria-label="Table of contents">
+        <p class="toc-title">On this page</p>
+        <ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#architecture">Architecture</a></li>
+          <li class="toc-h3"><a href="#how-it-works">How it works</a></li>
+          <li><a href="#quick-start">Quick start</a></li>
+          <li class="toc-h3"><a href="#quick-start">Build &amp; test</a></li>
+          <li class="toc-h3"><a href="#quick-start">C# API</a></li>
+          <li class="toc-h3"><a href="#quick-start">CLI</a></li>
+          <li><a href="#docs">Documentation</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</body>
+</html>
